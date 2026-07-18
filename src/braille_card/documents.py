@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import html
+import io
 import json
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from reportlab.lib.colors import HexColor, black, white
 from reportlab.lib.units import mm
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 
 from . import spec
@@ -31,9 +33,10 @@ def _draw_braille_pil(
         for x, y in dot_centres(
             translation.unicode, origin_x=origin[0], origin_y=line_origin_y
         ):
+            pixel_y = (spec.CARD_HEIGHT - y) * scale
             draw.ellipse(
-                ((x * scale - radius), (y * scale - radius),
-                 (x * scale + radius), (y * scale + radius)),
+                ((x * scale - radius), (pixel_y - radius),
+                 (x * scale + radius), (pixel_y + radius)),
                 fill="#111111",
             )
 
@@ -66,8 +69,7 @@ def create_visual_preview(
         )
 
     def centered(draw: ImageDraw.ImageDraw, text: str, y_mm: float, font: ImageFont.FreeTypeFont) -> None:
-        box = draw.textbbox((0, 0), text, font=font)
-        draw.text(((panel_size[0] - (box[2] - box[0])) / 2, (spec.CARD_HEIGHT - y_mm) * scale), text, fill="#111111", font=font, anchor="ma")
+        draw.text((panel_size[0] / 2, (spec.CARD_HEIGHT - y_mm) * scale), text, fill="#111111", font=font, anchor="ma")
 
     centered(fd, greeting, 64.0, _font(34))
     centered(bd, message, 145.0, _font(25))
@@ -110,6 +112,7 @@ def create_layout_pdf(
         invariant=1,
     )
     c.setTitle("Reference Braille greeting card — print layout")
+    stable_image = ImageReader(io.BytesIO(normalized_image.read_bytes()))
     for face in ("FRONT", "BACK"):
         c.setFillColor(white)
         c.rect(0, 0, spec.CARD_WIDTH * mm, spec.CARD_HEIGHT * mm, stroke=0, fill=1)
@@ -121,7 +124,7 @@ def create_layout_pdf(
         if face == "FRONT":
             box = spec.FRONT_ART_REGION
             c.drawImage(
-                str(normalized_image), box[0] * mm, box[1] * mm,
+                stable_image, box[0] * mm, box[1] * mm,
                 width=(box[2] - box[0]) * mm, height=(box[3] - box[1]) * mm,
                 preserveAspectRatio=True, anchor="c", mask="auto",
             )
