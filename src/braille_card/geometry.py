@@ -10,6 +10,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
+import manifold3d
+import numpy as np
 
 from . import spec
 from .braille import Translation, dot_centres
@@ -57,12 +59,31 @@ class Mesh:
         segments: int = 64,
     ) -> None:
         """Add a closed disc with an inward top bevel and no point peak."""
-        inner = radius - bevel
+        self.add_bevelled_ellipse(cx, cy, radius, radius, z0, z1, bevel, segments)
+
+    def add_bevelled_ellipse(
+        self,
+        cx: float,
+        cy: float,
+        radius_x: float,
+        radius_y: float,
+        z0: float,
+        z1: float,
+        bevel: float,
+        segments: int = 64,
+    ) -> None:
+        """Add a closed ellipse with a uniform inward top bevel."""
+        inner_x = radius_x - bevel
+        inner_y = radius_y - bevel
         vertices: list[Vec3] = []
-        for z, r in ((z0, radius), (z1 - bevel, radius), (z1, inner)):
+        for z, rx, ry in (
+            (z0, radius_x, radius_y),
+            (z1 - bevel, radius_x, radius_y),
+            (z1, inner_x, inner_y),
+        ):
             for index in range(segments):
                 angle = 2 * math.pi * index / segments
-                vertices.append((cx + r * math.cos(angle), cy + r * math.sin(angle), z))
+                vertices.append((cx + rx * math.cos(angle), cy + ry * math.sin(angle), z))
         bottom_center = len(vertices)
         vertices.append((cx, cy, z0))
         top_center = len(vertices)
@@ -130,17 +151,40 @@ class Mesh:
         xs, ys, zs = zip(*self.vertices)
         return min(xs), min(ys), min(zs), max(xs), max(ys), max(zs)
 
+    def boolean_union(self) -> "Mesh":
+        """Return one true manifold solid from all overlapping closed parts."""
+        source = manifold3d.Mesh(
+            np.asarray(self.vertices, dtype=np.float32),
+            np.asarray(self.triangles, dtype=np.uint32),
+        )
+        aggregate = manifold3d.Manifold(source)
+        if aggregate.status() != manifold3d.Error.NoError:
+            raise ValueError(f"Input mesh is not manifold: {aggregate.status()}")
+        united = manifold3d.Manifold.batch_boolean(
+            aggregate.decompose(), manifold3d.OpType.Add
+        )
+        if united.status() != manifold3d.Error.NoError or united.is_empty():
+            raise ValueError(f"Boolean union failed: {united.status()}")
+        components = united.decompose()
+        if len(components) != 1:
+            raise ValueError(f"Boolean union left {len(components)} isolated components")
+        result = united.to_mesh()
+        return Mesh(
+            vertices=[tuple(float(value) for value in row[:3]) for row in result.vert_properties],
+            triangles=[tuple(int(value) for value in row) for row in result.tri_verts],
+        )
 
-# Connected chain of overlapping rounded discs. Values are x, y, radius in mm.
-HEART_DISCS = (
-    (42.5, 136.0, 25.0),
-    (84.5, 136.0, 25.0),
-    (63.5, 117.0, 32.0),
-    (63.5, 99.0, 24.0),
-    (63.5, 85.0, 12.0),
-    (63.5, 78.0, 6.0),
+
+# Connected chain of overlapping rounded ellipses. Values are x, y, rx, ry in mm.
+HEART_SHAPES = (
+    (41.5, 140.0, 24.0, 24.0),
+    (85.5, 140.0, 24.0, 24.0),
+    (63.5, 121.0, 31.0, 24.0),
+    (63.5, 101.0, 22.0, 25.0),
+    (63.5, 84.0, 10.0, 13.0),
 )
 TACTILE_BEVEL = 0.4
+BOOLEAN_OVERLAP = 0.08
 
 
 PIXEL_FONT = {
@@ -214,19 +258,20 @@ def build_combined_mesh(
     mesh = Mesh()
     mesh.add_box((0.0, 0.0, 0.0, spec.CARD_WIDTH, spec.CARD_HEIGHT, spec.PANEL_THICKNESS))
 
-    for cx, cy, radius in HEART_DISCS:
-        mesh.add_bevelled_disc(
-            cx, cy, radius, spec.PANEL_THICKNESS,
+    for cx, cy, radius_x, radius_y in HEART_SHAPES:
+        mesh.add_bevelled_ellipse(
+            cx, cy, radius_x, radius_y, spec.PANEL_THICKNESS - BOOLEAN_OVERLAP,
             spec.PANEL_THICKNESS + spec.TACTILE_RELIEF_HEIGHT,
             TACTILE_BEVEL,
         )
 
     _add_pixel_text(mesh, "WITH LOVE", spec.CARD_WIDTH / 2, 58.0,
-                    spec.PANEL_THICKNESS, spec.PANEL_THICKNESS + spec.VISUAL_TEXT_RELIEF_HEIGHT)
+                    spec.PANEL_THICKNESS - BOOLEAN_OVERLAP,
+                    spec.PANEL_THICKNESS + spec.VISUAL_TEXT_RELIEF_HEIGHT)
     _add_pixel_text(mesh, "YOU MAKE EVERY", spec.CARD_WIDTH / 2, 143.0,
-                    0.0, -spec.VISUAL_TEXT_RELIEF_HEIGHT, back=True)
+                    -spec.VISUAL_TEXT_RELIEF_HEIGHT, BOOLEAN_OVERLAP, back=True)
     _add_pixel_text(mesh, "DAY BRIGHT.", spec.CARD_WIDTH / 2, 132.5,
-                    0.0, -spec.VISUAL_TEXT_RELIEF_HEIGHT, back=True)
+                    -spec.VISUAL_TEXT_RELIEF_HEIGHT, BOOLEAN_OVERLAP, back=True)
 
     front_dots: list[tuple[float, float]] = []
     for line_index, line in enumerate(front_lines):
@@ -237,13 +282,20 @@ def build_combined_mesh(
         back_dots_layout.extend(dot_centres(line.unicode, origin_x=14.0,
                                             origin_y=104.0 - line_index * spec.BRAILLE_LINE_SPACING))
     for x, y in front_dots:
+        mesh.add_bevelled_disc(x, y, spec.BRAILLE_DOT_DIAMETER * 0.42,
+                               spec.PANEL_THICKNESS - BOOLEAN_OVERLAP,
+                               spec.PANEL_THICKNESS + BOOLEAN_OVERLAP, 0.01, segments=24)
         mesh.add_spherical_cap(x, y, spec.PANEL_THICKNESS,
                                spec.BRAILLE_DOT_DIAMETER, spec.BRAILLE_DOT_HEIGHT)
     for layout_x, y in back_dots_layout:
-        mesh.add_spherical_cap(spec.CARD_WIDTH - layout_x, y, 0.0,
+        physical_x = spec.CARD_WIDTH - layout_x
+        mesh.add_bevelled_disc(physical_x, y, spec.BRAILLE_DOT_DIAMETER * 0.42,
+                               -BOOLEAN_OVERLAP, BOOLEAN_OVERLAP, 0.01, segments=24)
+        mesh.add_spherical_cap(physical_x, y, 0.0,
                                spec.BRAILLE_DOT_DIAMETER, spec.BRAILLE_DOT_HEIGHT,
                                downward=True)
 
+    mesh = mesh.boolean_union()
     metadata: dict[str, object] = {
         "coordinate_system": "millimetres; front view is +Z; back geometry mirrors X for correct reading when viewed from -Z",
         "panel": {"width_mm": spec.CARD_WIDTH, "height_mm": spec.CARD_HEIGHT, "thickness_mm": spec.PANEL_THICKNESS},
@@ -261,11 +313,11 @@ def build_combined_mesh(
         },
         "tactile": {
             "mode": "silhouette",
-            "shape": "connected overlapping bevelled discs",
-            "discs_mm": HEART_DISCS,
+            "shape": "connected overlapping bevelled ellipses",
+            "ellipses_cx_cy_rx_ry_mm": HEART_SHAPES,
             "relief_height_mm": spec.TACTILE_RELIEF_HEIGHT,
             "edge_bevel_mm": TACTILE_BEVEL,
-            "minimum_feature_mm": min(2 * disc[2] for disc in HEART_DISCS),
+            "minimum_feature_mm": min(2 * min(shape[2], shape[3]) for shape in HEART_SHAPES),
         },
         "visual_text": {"style": "raised 5x7 pixel lettering", "minimum_stroke_mm": PIXEL_SIZE, "relief_height_mm": spec.VISUAL_TEXT_RELIEF_HEIGHT},
         "mesh_bounds_mm": mesh.bounds(),
@@ -334,14 +386,14 @@ def write_3mf(mesh: Mesh, output: Path) -> None:
 
 
 def write_tactile_svg(output: Path) -> None:
-    circles = "\n".join(
-        f'  <circle cx="{cx:.3f}" cy="{spec.CARD_HEIGHT - cy:.3f}" r="{radius:.3f}"/>'
-        for cx, cy, radius in HEART_DISCS
+    ellipses = "\n".join(
+        f'  <ellipse cx="{cx:.3f}" cy="{spec.CARD_HEIGHT - cy:.3f}" rx="{radius_x:.3f}" ry="{radius_y:.3f}"/>'
+        for cx, cy, radius_x, radius_y in HEART_SHAPES
     )
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{spec.CARD_WIDTH}mm" height="{spec.CARD_HEIGHT}mm" viewBox="0 0 {spec.CARD_WIDTH} {spec.CARD_HEIGHT}">
 <title>Connected heart tactile silhouette source</title>
 <g fill="#111111" stroke="none">
-{circles}
+{ellipses}
 </g></svg>
 '''
     output.write_text(svg, encoding="utf-8", newline="\n")
@@ -351,13 +403,14 @@ def write_tactile_preview(output: Path) -> None:
     scale = 5
     image = Image.new("RGB", (round(spec.CARD_WIDTH * scale), round(spec.CARD_HEIGHT * scale)), "#f5f0e6")
     draw = ImageDraw.Draw(image)
-    for cx, cy, radius in HEART_DISCS:
+    for cx, cy, radius_x, radius_y in HEART_SHAPES:
         draw.ellipse(
-            ((cx - radius) * scale, (spec.CARD_HEIGHT - cy - radius) * scale,
-             (cx + radius) * scale, (spec.CARD_HEIGHT - cy + radius) * scale),
-            fill="#b04a5a", outline="#6b2330", width=3,
+            ((cx - radius_x) * scale, (spec.CARD_HEIGHT - cy - radius_y) * scale,
+             (cx + radius_x) * scale, (spec.CARD_HEIGHT - cy + radius_y) * scale),
+            fill="#b04a5a",
         )
-    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 16)
+    draw.rectangle((0, 0, image.width, 38), fill="#f5f0e6")
     draw.text((12, 12), "TACTILE SILHOUETTE — 0.8 mm RAISED, BEVELLED EDGE", fill="#222222", font=font)
     image.save(output, format="PNG", optimize=False)
 
@@ -366,12 +419,24 @@ def write_geometry_outputs(
     front_lines: list[Translation], back_lines: list[Translation], package_dir: Path
 ) -> dict[str, object]:
     mesh, metadata = build_combined_mesh(front_lines, back_lines)
-    write_binary_stl(mesh, package_dir / "combined_card.stl")
-    write_3mf(mesh, package_dir / "combined_card.3mf")
+    design_bounds = mesh.bounds()
+    # Rotate +90° about X and translate the lowest Y to zero. Pre-orienting the
+    # production model avoids slicer transform ambiguity and is itself deterministic.
+    y_shift = spec.PANEL_THICKNESS + spec.TACTILE_RELIEF_HEIGHT
+    production_mesh = Mesh(
+        vertices=[(x, y_shift - z, y) for x, y, z in mesh.vertices],
+        triangles=mesh.triangles.copy(),
+    )
+    metadata["design_coordinate_bounds_mm"] = design_bounds
+    metadata["mesh_bounds_mm"] = production_mesh.bounds()
+    metadata["mesh_vertex_count"] = len(production_mesh.vertices)
+    metadata["mesh_triangle_count"] = len(production_mesh.triangles)
+    metadata["slicing_orientation"] = "production STL/3MF is pre-oriented upright on the long edge; +Z is card height"
+    write_binary_stl(production_mesh, package_dir / "combined_card.stl")
+    write_3mf(production_mesh, package_dir / "combined_card.3mf")
     write_tactile_svg(package_dir / "tactile_layer.svg")
     write_tactile_preview(package_dir / "tactile_preview.png")
     (package_dir / "geometry.json").write_text(
         json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
     )
     return metadata
-

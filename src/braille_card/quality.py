@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 
 from . import spec
-from .geometry import HEART_DISCS, PIXEL_SIZE, TACTILE_BEVEL
+from .geometry import HEART_SHAPES, PIXEL_SIZE, TACTILE_BEVEL
 
 
 def _within(value: float, limits: tuple[float, float]) -> bool:
@@ -31,14 +31,15 @@ def tactile_is_connected() -> bool:
     pending = [0]
     while pending:
         current = pending.pop()
-        x1, y1, r1 = HEART_DISCS[current]
-        for index, (x2, y2, r2) in enumerate(HEART_DISCS):
+        x1, y1, rx1, ry1 = HEART_SHAPES[current]
+        for index, (x2, y2, rx2, ry2) in enumerate(HEART_SHAPES):
             if index in seen:
                 continue
-            if math.hypot(x2 - x1, y2 - y1) < r1 + r2:
+            normalized_distance = ((x2 - x1) / (rx1 + rx2)) ** 2 + ((y2 - y1) / (ry1 + ry2)) ** 2
+            if normalized_distance < 1:
                 seen.add(index)
                 pending.append(index)
-    return len(seen) == len(HEART_DISCS)
+    return len(seen) == len(HEART_SHAPES)
 
 
 def run_flat_card_checks(package_dir: Path | None = None) -> dict[str, dict[str, object]]:
@@ -55,10 +56,10 @@ def run_flat_card_checks(package_dir: Path | None = None) -> dict[str, dict[str,
         spec.BACK_PRINT_REGION, spec.BACK_BRAILLE_REGION,
     )
     art_bounds = (
-        min(cx - radius for cx, _, radius in HEART_DISCS),
-        min(cy - radius for _, cy, radius in HEART_DISCS),
-        max(cx + radius for cx, _, radius in HEART_DISCS),
-        max(cy + radius for _, cy, radius in HEART_DISCS),
+        min(cx - radius_x for cx, _, radius_x, _ in HEART_SHAPES),
+        min(cy - radius_y for _, cy, _, radius_y in HEART_SHAPES),
+        max(cx + radius_x for cx, _, radius_x, _ in HEART_SHAPES),
+        max(cy + radius_y for _, cy, _, radius_y in HEART_SHAPES),
     )
     footprint_with_brim = (
         spec.CARD_WIDTH + 10.0,
@@ -69,8 +70,8 @@ def run_flat_card_checks(package_dir: Path | None = None) -> dict[str, dict[str,
         "safe_margins": {"passed": all(_rect_inside_margin(region) for region in regions) and _rect_inside_margin(art_bounds), "safe_margin_mm": spec.SAFE_MARGIN, "art_bounds_mm": art_bounds},
         "braille_artwork_collision": {"passed": not _rects_overlap(spec.FRONT_BRAILLE_REGION, art_bounds), "front_braille_region_mm": spec.FRONT_BRAILLE_REGION, "art_bounds_mm": art_bounds},
         "braille_dimensional_baseline": {"passed": all(_within(value, spec.ADA_RANGES[name]) for name, value in ada_values.items()), "values_mm": ada_values, "required_ranges_mm": spec.ADA_RANGES},
-        "minimum_feature_size": {"passed": min(PIXEL_SIZE, min(2 * radius for _, _, radius in HEART_DISCS), spec.BRAILLE_DOT_DIAMETER) >= spec.MIN_FEATURE_SIZE, "minimum_actual_mm": min(PIXEL_SIZE, min(2 * radius for _, _, radius in HEART_DISCS), spec.BRAILLE_DOT_DIAMETER), "minimum_required_mm": spec.MIN_FEATURE_SIZE},
-        "no_isolated_tactile_fragments": {"passed": tactile_is_connected(), "component_count": len(HEART_DISCS), "connection_rule": "strict circle overlap"},
+        "minimum_feature_size": {"passed": min(PIXEL_SIZE, min(2 * min(rx, ry) for _, _, rx, ry in HEART_SHAPES), spec.BRAILLE_DOT_DIAMETER) >= spec.MIN_FEATURE_SIZE, "minimum_actual_mm": min(PIXEL_SIZE, min(2 * min(rx, ry) for _, _, rx, ry in HEART_SHAPES), spec.BRAILLE_DOT_DIAMETER), "minimum_required_mm": spec.MIN_FEATURE_SIZE},
+        "no_isolated_tactile_fragments": {"passed": tactile_is_connected(), "component_count": len(HEART_SHAPES), "connection_rule": "strict normalized axis-aligned ellipse overlap"},
         "no_unsafe_sharp_peaks": {"passed": TACTILE_BEVEL > 0 and spec.TACTILE_RELIEF_HEIGHT > TACTILE_BEVEL, "geometry": "flat plateaus with 0.4 mm straight bevel; no point apex", "maximum_bevel_slope_degrees": round(math.degrees(math.atan2(TACTILE_BEVEL, TACTILE_BEVEL)), 3)},
         "panel_thickness": {"passed": _within(spec.PANEL_THICKNESS, spec.PANEL_THICKNESS_RANGE), "actual_mm": spec.PANEL_THICKNESS, "allowed_mm": spec.PANEL_THICKNESS_RANGE},
         "sv07_build_area_fit": {"passed": all(actual <= limit for actual, limit in zip(footprint_with_brim, spec.SV07_BUILD_VOLUME)), "upright_footprint_with_5mm_brim_xyz_mm": footprint_with_brim, "stock_build_volume_xyz_mm": spec.SV07_BUILD_VOLUME},
@@ -91,4 +92,3 @@ def assert_checks_pass(checks: dict[str, dict[str, object]]) -> None:
     failures = [name for name, result in checks.items() if not result["passed"]]
     if failures:
         raise ValueError("Quality gates failed: " + ", ".join(failures))
-

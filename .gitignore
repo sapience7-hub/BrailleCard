@@ -1,8 +1,8 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
-.codex_run.log
-.watcher.log
+*.log
+.watcher_last_sha
 result.json
 .tools/
 build/

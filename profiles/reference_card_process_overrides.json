@@ -1,0 +1,15 @@
+{
+  "type": "process",
+  "name": "Braille reference card overrides @Sovol SV07",
+  "from": "user",
+  "inherits": "0.20mm Standard @Sovol SV07",
+  "enable_support": "1",
+  "support_type": "tree(auto)",
+  "support_style": "snug",
+  "support_on_build_plate_only": "0",
+  "brim_type": "outer_only",
+  "brim_width": "5",
+  "enable_prime_tower": "0",
+  "layer_change_gcode": "G92 E0",
+  "filename_format": "card.gcode"
+}
