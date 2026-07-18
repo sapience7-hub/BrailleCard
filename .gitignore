@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.codex_run.log
+.watcher.log
+result.json
+.tools/
+build/
+dist/
