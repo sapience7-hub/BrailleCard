@@ -245,7 +245,9 @@ def generate_package(
         normalized, greeting, message, front_lines, back_lines,
         output_dir / "layout.pdf",
     )
-    geometry = write_geometry_outputs(front_lines, back_lines, output_dir)
+    geometry = write_geometry_outputs(
+        front_lines, back_lines, output_dir, greeting=greeting, message=message
+    )
     gcode = slice_card(output_dir / "combined_card.stl", output_dir / "card.gcode", slicer_root)
     _write_operator_documents(output_dir)
 
@@ -265,4 +267,3 @@ def generate_package(
         newline="\n",
     )
     return output_dir
-

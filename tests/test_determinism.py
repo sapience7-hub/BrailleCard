@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import re
 import socket
+import json
+import zipfile
 from pathlib import Path
 
 from braille_card.package import generate_package
@@ -30,6 +32,17 @@ def test_full_package_is_byte_identical_and_path_clean(tmp_path: Path) -> None:
         name: sha256_file(second / name) for name in second_files
     }
     assert (first / "original_input.svg").read_bytes() == (repository / "examples/heart.svg").read_bytes()
+    with zipfile.ZipFile(first / "combined_card.3mf") as archive:
+        assert {entry.date_time for entry in archive.infolist()} == {(1980, 1, 1, 0, 0, 0)}
+    manifest = json.loads((first / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["files"] == {
+        name: {"sha256": sha256_file(first / name), "bytes": (first / name).stat().st_size}
+        for name in sorted(first_files)
+        if name != "manifest.json"
+    }
+    pdf = (first / "layout.pdf").read_bytes()
+    assert b"/MediaBox [ 0 0 360 504 ]" in pdf
+    assert b"/Count 2" in pdf
 
     forbidden = [str(tmp_path), str(repository), socket.gethostname()]
     text_suffixes = {".json", ".md", ".txt", ".html", ".svg", ".brf", ".gcode"}
@@ -59,4 +72,3 @@ def test_gcode_is_stock_sv07_profile_and_never_submitted(tmp_path: Path) -> None
     manifest = (package / "manifest.json").read_text(encoding="utf-8")
     assert '"submitted_to_printer": false' in manifest
     assert '"print_started": false' in manifest
-

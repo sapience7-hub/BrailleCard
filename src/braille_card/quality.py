@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
+import xml.etree.ElementTree as ET
+
+from PIL import Image
 
 from . import spec
 from .geometry import HEART_SHAPES, PIXEL_SIZE, TACTILE_BEVEL
@@ -77,13 +80,34 @@ def run_flat_card_checks(package_dir: Path | None = None) -> dict[str, dict[str,
         "sv07_build_area_fit": {"passed": all(actual <= limit for actual, limit in zip(footprint_with_brim, spec.SV07_BUILD_VOLUME)), "upright_footprint_with_5mm_brim_xyz_mm": footprint_with_brim, "stock_build_volume_xyz_mm": spec.SV07_BUILD_VOLUME},
     }
     if package_dir is not None:
+        originals = sorted(package_dir.glob("original_input.*"))
+        input_error = ""
+        try:
+            if len(originals) != 1:
+                raise ValueError(f"expected one retained original, found {len(originals)}")
+            if originals[0].suffix.lower() == ".svg":
+                ET.parse(originals[0])
+            else:
+                with Image.open(originals[0]) as original_image:
+                    original_image.verify()
+            with Image.open(package_dir / "normalized_production.png") as normalized:
+                normalized.verify()
+        except Exception as exc:  # reported as a failed auditable check below
+            input_error = str(exc)
+        checks["uploaded_file_readable"] = {
+            "passed": not input_error,
+            "retained_original_count": len(originals),
+            "error": input_error,
+        }
         required = (
-            "layout.pdf", "original_input.svg", "normalized_production.png", "visual_preview.png",
+            "layout.pdf", "normalized_production.png", "visual_preview.png",
             "braille_source.txt", "braille_ueb.brf", "braille_ueb_unicode.txt", "braille_review.html",
             "tactile_preview.png", "tactile_layer.svg", "combined_card.stl", "combined_card.3mf",
             "card.gcode", "PRINTING_AND_FINISHING.md", "QUALITY_CONTROL.md",
         )
         missing = [name for name in required if not (package_dir / name).is_file() or (package_dir / name).stat().st_size == 0]
+        if len(originals) != 1 or (originals and originals[0].stat().st_size == 0):
+            missing.append("original_input.<supported extension>")
         checks["exports_generated"] = {"passed": not missing, "missing_or_empty": missing}
     return checks
 

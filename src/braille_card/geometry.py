@@ -215,6 +215,10 @@ PIXEL_FONT = {
     "Y": ("10001", "10001", "01010", "00100", "00100", "00100", "00100"),
     "Z": ("11111", "00001", "00010", "00100", "01000", "10000", "11111"),
     ".": ("00000", "00000", "00000", "00000", "00000", "00110", "00110"),
+    ",": ("00000", "00000", "00000", "00000", "00110", "00100", "01000"),
+    "!": ("00100", "00100", "00100", "00100", "00100", "00000", "00100"),
+    "?": ("01110", "10001", "00001", "00010", "00100", "00000", "00100"),
+    "-": ("00000", "00000", "00000", "11111", "00000", "00000", "00000"),
 }
 PIXEL_SIZE = 0.9
 PIXEL_PITCH = 1.05
@@ -252,8 +256,29 @@ def _add_pixel_text(
                 mesh.add_box((x0, y0, z0, x1, y1, z1))
 
 
+def _wrap_visual_text(source: str, max_characters: int = 16) -> list[str]:
+    words = source.upper().split()
+    lines: list[str] = []
+    current = ""
+    for word in words:
+        candidate = word if not current else f"{current} {word}"
+        if len(candidate) <= max_characters:
+            current = candidate
+        else:
+            if not current or len(word) > max_characters:
+                raise ValueError(f"Visual-text word does not fit in {max_characters} characters")
+            lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+    return lines
+
+
 def build_combined_mesh(
-    front_lines: list[Translation], back_lines: list[Translation]
+    front_lines: list[Translation],
+    back_lines: list[Translation],
+    greeting: str = "With love",
+    message: str = "You make every day bright.",
 ) -> tuple[Mesh, dict[str, object]]:
     mesh = Mesh()
     mesh.add_box((0.0, 0.0, 0.0, spec.CARD_WIDTH, spec.CARD_HEIGHT, spec.PANEL_THICKNESS))
@@ -265,13 +290,18 @@ def build_combined_mesh(
             TACTILE_BEVEL,
         )
 
-    _add_pixel_text(mesh, "WITH LOVE", spec.CARD_WIDTH / 2, 58.0,
+    visual_greeting = _wrap_visual_text(greeting)
+    if len(visual_greeting) != 1:
+        raise ValueError("Front greeting must fit on one 16-character visual line")
+    visual_message = _wrap_visual_text(message)
+    if len(visual_message) > 2:
+        raise ValueError("Back message must fit on at most two 16-character visual lines")
+    _add_pixel_text(mesh, visual_greeting[0], spec.CARD_WIDTH / 2, 58.0,
                     spec.PANEL_THICKNESS - BOOLEAN_OVERLAP,
                     spec.PANEL_THICKNESS + spec.VISUAL_TEXT_RELIEF_HEIGHT)
-    _add_pixel_text(mesh, "YOU MAKE EVERY", spec.CARD_WIDTH / 2, 143.0,
-                    -spec.VISUAL_TEXT_RELIEF_HEIGHT, BOOLEAN_OVERLAP, back=True)
-    _add_pixel_text(mesh, "DAY BRIGHT.", spec.CARD_WIDTH / 2, 132.5,
-                    -spec.VISUAL_TEXT_RELIEF_HEIGHT, BOOLEAN_OVERLAP, back=True)
+    for line_index, visual_line in enumerate(visual_message):
+        _add_pixel_text(mesh, visual_line, spec.CARD_WIDTH / 2, 143.0 - line_index * 10.5,
+                        -spec.VISUAL_TEXT_RELIEF_HEIGHT, BOOLEAN_OVERLAP, back=True)
 
     front_dots: list[tuple[float, float]] = []
     for line_index, line in enumerate(front_lines):
@@ -319,7 +349,13 @@ def build_combined_mesh(
             "edge_bevel_mm": TACTILE_BEVEL,
             "minimum_feature_mm": min(2 * min(shape[2], shape[3]) for shape in HEART_SHAPES),
         },
-        "visual_text": {"style": "raised 5x7 pixel lettering", "minimum_stroke_mm": PIXEL_SIZE, "relief_height_mm": spec.VISUAL_TEXT_RELIEF_HEIGHT},
+        "visual_text": {
+            "style": "raised 5x7 pixel lettering",
+            "minimum_stroke_mm": PIXEL_SIZE,
+            "relief_height_mm": spec.VISUAL_TEXT_RELIEF_HEIGHT,
+            "front_lines": visual_greeting,
+            "back_lines": visual_message,
+        },
         "mesh_bounds_mm": mesh.bounds(),
         "mesh_vertex_count": len(mesh.vertices),
         "mesh_triangle_count": len(mesh.triangles),
@@ -416,9 +452,13 @@ def write_tactile_preview(output: Path) -> None:
 
 
 def write_geometry_outputs(
-    front_lines: list[Translation], back_lines: list[Translation], package_dir: Path
+    front_lines: list[Translation],
+    back_lines: list[Translation],
+    package_dir: Path,
+    greeting: str = "With love",
+    message: str = "You make every day bright.",
 ) -> dict[str, object]:
-    mesh, metadata = build_combined_mesh(front_lines, back_lines)
+    mesh, metadata = build_combined_mesh(front_lines, back_lines, greeting, message)
     design_bounds = mesh.bounds()
     # Rotate +90° about X and translate the lowest Y to zero. Pre-orienting the
     # production model avoids slicer transform ambiguity and is itself deterministic.
