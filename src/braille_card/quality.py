@@ -1,0 +1,94 @@
+"""Machine quality and safety gates that apply to the flat reference card."""
+
+from __future__ import annotations
+
+import math
+from pathlib import Path
+
+from . import spec
+from .geometry import HEART_DISCS, PIXEL_SIZE, TACTILE_BEVEL
+
+
+def _within(value: float, limits: tuple[float, float]) -> bool:
+    return limits[0] <= value <= limits[1]
+
+
+def _rect_inside_margin(rect: tuple[float, float, float, float]) -> bool:
+    left, bottom, right, top = rect
+    return (
+        left >= spec.SAFE_MARGIN and bottom >= spec.SAFE_MARGIN
+        and right <= spec.CARD_WIDTH - spec.SAFE_MARGIN
+        and top <= spec.CARD_HEIGHT - spec.SAFE_MARGIN
+    )
+
+
+def _rects_overlap(a: tuple[float, float, float, float], b: tuple[float, float, float, float]) -> bool:
+    return not (a[2] <= b[0] or b[2] <= a[0] or a[3] <= b[1] or b[3] <= a[1])
+
+
+def tactile_is_connected() -> bool:
+    seen = {0}
+    pending = [0]
+    while pending:
+        current = pending.pop()
+        x1, y1, r1 = HEART_DISCS[current]
+        for index, (x2, y2, r2) in enumerate(HEART_DISCS):
+            if index in seen:
+                continue
+            if math.hypot(x2 - x1, y2 - y1) < r1 + r2:
+                seen.add(index)
+                pending.append(index)
+    return len(seen) == len(HEART_DISCS)
+
+
+def run_flat_card_checks(package_dir: Path | None = None) -> dict[str, dict[str, object]]:
+    """Return auditable results; callers must fail if any result is false."""
+    ada_values = {
+        "dot_base_diameter_mm": spec.BRAILLE_DOT_DIAMETER,
+        "within_cell_spacing_mm": spec.BRAILLE_DOT_SPACING,
+        "cell_to_cell_spacing_mm": spec.BRAILLE_CELL_SPACING,
+        "line_to_line_spacing_mm": spec.BRAILLE_LINE_SPACING,
+        "dot_height_mm": spec.BRAILLE_DOT_HEIGHT,
+    }
+    regions = (
+        spec.FRONT_ART_REGION, spec.FRONT_PRINT_REGION, spec.FRONT_BRAILLE_REGION,
+        spec.BACK_PRINT_REGION, spec.BACK_BRAILLE_REGION,
+    )
+    art_bounds = (
+        min(cx - radius for cx, _, radius in HEART_DISCS),
+        min(cy - radius for _, cy, radius in HEART_DISCS),
+        max(cx + radius for cx, _, radius in HEART_DISCS),
+        max(cy + radius for _, cy, radius in HEART_DISCS),
+    )
+    footprint_with_brim = (
+        spec.CARD_WIDTH + 10.0,
+        spec.PANEL_THICKNESS + spec.BRAILLE_DOT_HEIGHT + max(spec.BRAILLE_DOT_HEIGHT, spec.TACTILE_RELIEF_HEIGHT) + 10.0,
+        spec.CARD_HEIGHT,
+    )
+    checks: dict[str, dict[str, object]] = {
+        "safe_margins": {"passed": all(_rect_inside_margin(region) for region in regions) and _rect_inside_margin(art_bounds), "safe_margin_mm": spec.SAFE_MARGIN, "art_bounds_mm": art_bounds},
+        "braille_artwork_collision": {"passed": not _rects_overlap(spec.FRONT_BRAILLE_REGION, art_bounds), "front_braille_region_mm": spec.FRONT_BRAILLE_REGION, "art_bounds_mm": art_bounds},
+        "braille_dimensional_baseline": {"passed": all(_within(value, spec.ADA_RANGES[name]) for name, value in ada_values.items()), "values_mm": ada_values, "required_ranges_mm": spec.ADA_RANGES},
+        "minimum_feature_size": {"passed": min(PIXEL_SIZE, min(2 * radius for _, _, radius in HEART_DISCS), spec.BRAILLE_DOT_DIAMETER) >= spec.MIN_FEATURE_SIZE, "minimum_actual_mm": min(PIXEL_SIZE, min(2 * radius for _, _, radius in HEART_DISCS), spec.BRAILLE_DOT_DIAMETER), "minimum_required_mm": spec.MIN_FEATURE_SIZE},
+        "no_isolated_tactile_fragments": {"passed": tactile_is_connected(), "component_count": len(HEART_DISCS), "connection_rule": "strict circle overlap"},
+        "no_unsafe_sharp_peaks": {"passed": TACTILE_BEVEL > 0 and spec.TACTILE_RELIEF_HEIGHT > TACTILE_BEVEL, "geometry": "flat plateaus with 0.4 mm straight bevel; no point apex", "maximum_bevel_slope_degrees": round(math.degrees(math.atan2(TACTILE_BEVEL, TACTILE_BEVEL)), 3)},
+        "panel_thickness": {"passed": _within(spec.PANEL_THICKNESS, spec.PANEL_THICKNESS_RANGE), "actual_mm": spec.PANEL_THICKNESS, "allowed_mm": spec.PANEL_THICKNESS_RANGE},
+        "sv07_build_area_fit": {"passed": all(actual <= limit for actual, limit in zip(footprint_with_brim, spec.SV07_BUILD_VOLUME)), "upright_footprint_with_5mm_brim_xyz_mm": footprint_with_brim, "stock_build_volume_xyz_mm": spec.SV07_BUILD_VOLUME},
+    }
+    if package_dir is not None:
+        required = (
+            "layout.pdf", "original_input.svg", "normalized_production.png", "visual_preview.png",
+            "braille_source.txt", "braille_ueb.brf", "braille_ueb_unicode.txt", "braille_review.html",
+            "tactile_preview.png", "tactile_layer.svg", "combined_card.stl", "combined_card.3mf",
+            "card.gcode", "PRINTING_AND_FINISHING.md", "QUALITY_CONTROL.md",
+        )
+        missing = [name for name in required if not (package_dir / name).is_file() or (package_dir / name).stat().st_size == 0]
+        checks["exports_generated"] = {"passed": not missing, "missing_or_empty": missing}
+    return checks
+
+
+def assert_checks_pass(checks: dict[str, dict[str, object]]) -> None:
+    failures = [name for name, result in checks.items() if not result["passed"]]
+    if failures:
+        raise ValueError("Quality gates failed: " + ", ".join(failures))
+
