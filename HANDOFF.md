@@ -1,5 +1,36 @@
 # Handoff — Braille greeting card immediate milestone
 
+## 2026-07-19 one-off Flat v4 physical run
+
+The user explicitly authorized one physical print of
+`FLAT-braillecard-RIM-v4-ALLCAPS-1h10m.gcode` on the SV07. The exact uploaded
+file was selected and started through Moonraker after confirming that the
+printer was ready, the virtual SD was inactive, and the camera showed an empty
+build plate.
+
+- Camera capture began at 09:03:45 EDT; the printer entered its start/heat-up
+  sequence at approximately 09:07:40 EDT and began extrusion at approximately
+  09:10:58 EDT.
+- Moonraker reported `complete`, 100% progress, inactive virtual SD, and no
+  error message at 10:23:38 EDT. Total job duration was 75.96 minutes and
+  extrusion/print duration was 72.67 minutes. The nozzle and bed targets both
+  returned to 0 C after completion.
+- Read-only one-minute telemetry checks and camera checkpoints found no error,
+  obvious spaghetti, or visible part displacement. This does **not** establish
+  Braille accuracy, tactile quality, dot integrity, adhesion, or dimensional
+  conformance; the cooled part still needs direct human inspection.
+- The untouched continuous capture is
+  `/mnt/dgxdata/recordings/braille-greeting-cards/FLAT-braillecard-RIM-v4-ALLCAPS-full-capture-2026-07-19.mkv`
+  (1600x1200 H.264, 25 fps, 76:57, 1,707,725,924 bytes, SHA-256
+  `c7796e364d3d106d2a0bc87a9bf8b1556f54e1db277042276345d4953ad51cdd`).
+- The derived 60x timelapse is
+  `/mnt/dgxdata/recordings/braille-greeting-cards/FLAT-braillecard-RIM-v4-ALLCAPS-timelapse-2026-07-19.mp4`
+  (1280x720 H.264, 30 fps, 01:16.97, 20,996,567 bytes, SHA-256
+  `9d192b24caac4398cd95ab922e341d2db3f355f2347ea08e100ac61df5187d28`).
+  It is cropped and gently graded for visibility; the MKV above remains the
+  archival source. The printer's lamp clips highlights directly beneath the
+  toolhead, and the rest of the camera view is dark.
+
 ## Status
 
 **Production package generated and machine-checked.** This is intentionally not
@@ -51,10 +82,12 @@ matches the generated file. The Braille review status is explicitly
 
 ## Physical-printer boundary
 
-No printer or printer host was contacted, discovered, queried, pinged, probed,
-or controlled. No print job was submitted or started. The only printer-related
-result is the local `card.gcode` file. The repository contains no printer upload
-or print-start implementation.
+When the deterministic reference package described below was generated, no
+printer or printer host was contacted, discovered, queried, pinged, probed, or
+controlled. Its only printer-related result was the local `card.gcode` file,
+and the repository still contains no printer upload or print-start
+implementation. The later user-authorized, one-off Flat v4 operator run is
+recorded separately above and does not change that implementation boundary.
 
 ## Human work that remains
 
