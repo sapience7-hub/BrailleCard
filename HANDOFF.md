@@ -1,4 +1,106 @@
-# Handoff — Braille greeting card immediate milestone
+---
+handoff_version: 1
+project: Braille Greeting Cards
+project_root: /home/tangoren/projects/braille-greeting-cards
+updated_at: 2026-07-19T12:00:22-04:00
+status: ready
+branch: master
+head: e8d569acc4ed269e65875932fcebb7346a4ff10e
+obsidian_note: /home/tangoren/Obsidian on DGX/Dev Logs/Handoffs/Braille Greeting Cards.md
+---
+
+# Braille Greeting Cards — Handoff
+
+## Objective
+
+Retain the deterministic, machine-checked 5x7 Braille greeting-card reference
+package and record the separately authorized one-off Flat v4 SV07 print and its
+continuous/timelapse evidence without overstating physical or Braille quality.
+
+## Resume state
+
+- Current status: reference package objective complete; the Flat v4 operator
+  run completed successfully, but direct tactile/quality inspection remains.
+- Working tree: expected clean after the closedown documentation commit.
+- Active goal: none for this repository; the thread's Ambient P8.1 goal is
+  complete and separate.
+- Last safe checkpoint: `e8d569acc4ed269e65875932fcebb7346a4ff10e` —
+  `docs: record Flat v4 physical run`.
+- Branch relation: `master` has no configured upstream or remote; nothing was
+  pushed.
+
+## Runtime state
+
+| Component | State | Session action | Reason / check command |
+| --- | --- | --- | --- |
+| SV07 Flat v4 job | complete, 100%, virtual SD inactive, heater targets 0 C | explicitly started and monitored to completion | Moonraker `print_stats` and `virtual_sdcard` query |
+| Continuous camera capture | stopped and finalized | started before print; stopped after post-roll | MKV probes as 1600x1200 H.264, 76:57 |
+| 60x timelapse transcode | complete | generated from untouched master | MP4 probes as 1280x720 H.264, 01:16.97 |
+| Printer/capture monitors | stopped | one-minute polling completed | No ffmpeg or polling process remains |
+
+## Completed this session
+
+- Printed the exact user-authorized
+  `FLAT-braillecard-RIM-v4-ALLCAPS-1h10m.gcode`; Moonraker reported complete
+  with no error after 72.67 minutes of extrusion.
+- Preserved a hash-verified untouched master and a separately derived,
+  hash-verified 60x timelapse on `/mnt/dgxdata`.
+- Camera checkpoints found no obvious spaghetti or displacement while keeping
+  tactile/Braille claims explicitly unverified.
+- Updated the project record to distinguish the original offline pipeline's
+  printer boundary from the later, separately authorized operator run.
+
+## Decisions and constraints
+
+- Camera evidence is not a substitute for cooled-part measurement, dot
+  inspection, qualified Braille review, or tactile testing.
+- The continuous MKV remains the archival source; the MP4 is cropped and graded
+  only as a watchable derivative.
+- The repository still contains no printer upload/start implementation. The
+  physical action was an operator-session use of Moonraker, not product code.
+
+## Changed files
+
+- `HANDOFF.md` — physical run, media evidence, runtime state, and resumable
+  closedown snapshot.
+
+## Verification
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `pytest -q` | PASS | 8 passed; one ReportLab/Python deprecation warning |
+| `git diff --check` | PASS | Clean |
+| `ffprobe` on master MKV | PASS | H.264, 1600x1200, 25 fps, 4,617.64 seconds, 1,707,725,924 bytes |
+| `ffprobe` on timelapse MP4 | PASS | H.264, 1280x720, 30 fps, 76.97 seconds, 20,996,567 bytes |
+| First/middle/last frame decode for both files | PASS | All six frames decoded and were visually inspected |
+
+## Remaining work
+
+- Inspect the cooled Flat v4 card directly for adhesion, warping, dimensions,
+  heart rim, printed text, Braille dot integrity, and tactile readability.
+- Qualified Braille review and the broader multi-tester/MVP acceptance work
+  remain required before any production claim.
+
+## Blockers and risks
+
+- Physical and tactile quality cannot be resolved remotely from the current
+  dark, high-contrast camera angle.
+
+## Next action
+
+Remove the cooled Flat v4 card, inspect it against the generated quality
+checklist, and record measured defects or acceptance evidence before iterating
+the geometry.
+
+## Openup checklist
+
+1. Verify project root, branch, checkpoint, and working tree.
+2. Read `GOAL.md`, `docs/PRODUCT_GOAL.md`, and this handoff.
+3. Preserve the distinction between machine checks and human review.
+4. Report drift before making changes.
+5. Continue with the Next action.
+
+## Detailed run record
 
 ## 2026-07-19 one-off Flat v4 physical run
 
