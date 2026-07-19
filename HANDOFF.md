@@ -2,10 +2,10 @@
 handoff_version: 1
 project: Braille Greeting Cards
 project_root: /home/tangoren/projects/braille-greeting-cards
-updated_at: 2026-07-19T12:00:22-04:00
+updated_at: 2026-07-19T16:40:09-04:00
 status: ready
 branch: master
-head: e8d569acc4ed269e65875932fcebb7346a4ff10e
+head: ff82599437fb2866509e061a6e5d319f167dc554
 obsidian_note: /home/tangoren/Obsidian on DGX/Dev Logs/Handoffs/Braille Greeting Cards.md
 ---
 
@@ -14,18 +14,20 @@ obsidian_note: /home/tangoren/Obsidian on DGX/Dev Logs/Handoffs/Braille Greeting
 ## Objective
 
 Retain the deterministic, machine-checked 5x7 Braille greeting-card reference
-package and record the separately authorized one-off Flat v4 SV07 print and its
-continuous/timelapse evidence without overstating physical or Braille quality.
+package and its Flat v4 print evidence, then plan a staged, verifiable website
+workflow for tactile-photo cards without starting a one-shot implementation.
 
 ## Resume state
 
-- Current status: reference package objective complete; the Flat v4 operator
-  run completed successfully, but direct tactile/quality inspection remains.
-- Working tree: expected clean after the closedown documentation commit.
-- Active goal: none for this repository; the thread's Ambient P8.1 goal is
-  complete and separate.
-- Last safe checkpoint: `e8d569acc4ed269e65875932fcebb7346a4ff10e` —
-  `docs: record Flat v4 physical run`.
+- Current status: reference package and Flat v4 operator run are complete. The
+  user accepts the larger plaque/tactile-photograph direction and wants the
+  next session to plan the website workflow in verified milestones. Earlier
+  tactile feedback that the Latin text and Braille were too small is recorded,
+  but geometry iteration is not the immediate priority.
+- Working tree: clean before this handoff update.
+- Active goal: none for this repository.
+- Last safe checkpoint: `ff82599437fb2866509e061a6e5d319f167dc554` —
+  `docs: close physical print session`.
 - Branch relation: `master` has no configured upstream or remote; nothing was
   pushed.
 
@@ -52,6 +54,15 @@ continuous/timelapse evidence without overstating physical or Braille quality.
 
 ## Decisions and constraints
 
+- Treat the product as a tactile photograph/plaque: a relief image with Latin
+  text and Braille. Card size remains a product choice for the staged website
+  plan; smaller tiles are testers rather than the default finished card.
+- Do not make geometry calibration a prerequisite for planning the workflow.
+  The prior print established that the larger plaque format is feasible; the
+  earlier small-text/small-dot feedback remains a future design input.
+- Keep preview and production separate: render first, show the user the
+  image/text/Braille result, require explicit operator print approval, then
+  show camera and print-job status. Never silently start a printer.
 - Camera evidence is not a substitute for cooled-part measurement, dot
   inspection, qualified Braille review, or tactile testing.
 - The continuous MKV remains the archival source; the MP4 is cropped and graded
@@ -59,10 +70,25 @@ continuous/timelapse evidence without overstating physical or Braille quality.
 - The repository still contains no printer upload/start implementation. The
   physical action was an operator-session use of Moonraker, not product code.
 
+## Website workflow sequence
+
+1. **Plan and acceptance map:** define upload, short message, size choice,
+   rendered preview, explicit print approval, camera, and job-status boundaries.
+   Verify in writing; do not write application code.
+2. **Local render slice:** build and test a deterministic local render from a
+   sample image and message. Verify relief preview, Latin text, and Braille
+   artifacts without camera or printer connection.
+3. **Browser preview slice:** add upload and message entry, render the same
+   artifacts in the browser, and verify error states and saved job metadata.
+4. **Operator print slice:** add a separate approval action and mocked job
+   state first. Verify that no print can begin before approval.
+5. **Hardware observation slice:** connect read-only camera and job-status
+   updates, then test a real print only with separate explicit authorization.
+
 ## Changed files
 
-- `HANDOFF.md` — physical run, media evidence, runtime state, and resumable
-  closedown snapshot.
+- `HANDOFF.md` — preserves the product-direction change and staged website
+  workflow for the next session.
 
 ## Verification
 
@@ -76,21 +102,23 @@ continuous/timelapse evidence without overstating physical or Braille quality.
 
 ## Remaining work
 
-- Inspect the cooled Flat v4 card directly for adhesion, warping, dimensions,
-  heart rim, printed text, Braille dot integrity, and tactile readability.
-- Qualified Braille review and the broader multi-tester/MVP acceptance work
-  remain required before any production claim.
+- Complete website-workflow step 1 only: a written acceptance map and verified
+  implementation plan. Do not begin browser, printer, or camera slices in the
+  same step.
+- The earlier text/Braille-size feedback, qualified Braille review, and broader
+  multi-tester acceptance remain requirements before production claims, but do
+  not block the next planning step.
 
 ## Blockers and risks
 
-- Physical and tactile quality cannot be resolved remotely from the current
-  dark, high-contrast camera angle.
+- Finished-card size, website hosting/storage, and eventual camera/printer
+  integration are intentionally unselected. Resolve them within the staged plan;
+  no hardware action is authorized by this handoff.
 
 ## Next action
 
-Remove the cooled Flat v4 card, inspect it against the generated quality
-checklist, and record measured defects or acceptance evidence before iterating
-the geometry.
+Create the website-workflow acceptance map, then present only the first
+implementation slice (deterministic local render) for approval before coding.
 
 ## Openup checklist
 
@@ -191,9 +219,10 @@ and the repository still contains no printer upload or print-start
 implementation. The later user-authorized, one-off Flat v4 operator run is
 recorded separately above and does not change that implementation boundary.
 
-## Human work that remains
+## Legacy production-acceptance conditions
 
-Before this card is “done” in the product specification's sense:
+These remain conditions for a production-quality claim. They are not a blocker
+for the next website-planning session, which the user has explicitly prioritized.
 
 1. An operator must inspect the full local G-code/layer preview and perform a
    supervised SV07 PLA test print, then measure the panel and Braille geometry.
