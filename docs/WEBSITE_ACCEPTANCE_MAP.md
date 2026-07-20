@@ -193,6 +193,19 @@ The implementation of this workflow follows a 5-step staged progression:
 
 ---
 
+## Step 2 completion
+
+The deterministic local-render slice is complete. The CLI preview-only path
+accepts one supported image and one greeting/message card JSON, then creates
+normalized/visual/tactile/UEB review artifacts without invoking OrcaSlicer,
+creating STL/3MF/G-code, starting a browser, or contacting any hardware.
+
+This slice is machine-checked only. Braille review, visual approval, tactile
+evaluation, print approval, camera observation, and telemetry remain deferred
+to their respective workflow stages.
+
 ## Next Steps
 
-Upon user review and approval of this Acceptance Map (`docs/WEBSITE_ACCEPTANCE_MAP.md`), work will proceed to **Step 2: Local Render Slice** (building and testing a deterministic local render CLI slice without camera or network printer connections).
+Proceed to Step 3: Browser Preview Slice. It must reuse the deterministic
+preview artifacts, add upload/message entry and error states, and retain the
+separate explicit print-approval boundary.

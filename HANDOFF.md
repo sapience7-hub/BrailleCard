@@ -2,14 +2,28 @@
 handoff_version: 1
 project: Braille Greeting Cards
 project_root: /home/tangoren/projects/braille-greeting-cards
-updated_at: 2026-07-19T16:40:09-04:00
+updated_at: 2026-07-20T00:00:00-04:00
 status: ready
-branch: master
-head: ff82599437fb2866509e061a6e5d319f167dc554
+branch: feat/braille-preview-render
+head: 317174ca9887c9f1bec7cf287195203b294aba90
 obsidian_note: /home/tangoren/Obsidian on DGX/Dev Logs/Handoffs/Braille Greeting Cards.md
 ---
 
 # Braille Greeting Cards — Handoff
+
+## Current local-render slice — 2026-07-20
+
+The website-workflow Step 2 local render slice is implemented through 317174c.
+The new preview-only CLI produces retained/normalized image, visual/tactile
+preview, and uncontracted UEB review artifacts from one image plus card JSON.
+It does not invoke OrcaSlicer, export STL/3MF, generate G-code, start a
+browser, or contact printer/camera hardware.
+
+- Focused preview suite: 5 passed.
+- Full suite: 13 passed.
+- The work is on feat/braille-preview-render; it has not been pushed.
+- The next product slice is Step 3, a browser preview that must reuse these
+  deterministic artifacts and preserve the separate operator print boundary.
 
 ## Objective
 
