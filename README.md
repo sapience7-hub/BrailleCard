@@ -21,6 +21,21 @@ PYTHONPATH=src python3 -m braille_card \
   --output dist/reference-card
 ```
 
+Generate only the local review artifacts:
+
+~~~sh
+PYTHONPATH=src python3 -m braille_card \
+  --preview-only \
+  --image examples/heart.svg \
+  --card examples/card.json \
+  --output dist/local-preview
+~~~
+
+Preview-only output contains the retained/normalized image, visual and tactile
+previews, plus uncontracted UEB review artifacts. It does not generate
+production geometry or G-code, invoke OrcaSlicer, start a browser, or contact
+a printer.
+
 The destination must be absent or empty so stale files cannot leak into a
 manifest. Run all gates with `pytest -q`. The generated G-code remains a file;
 printing, Braille review, tactile testing, and operator quality control are
@@ -46,4 +61,3 @@ workflow:
 We treated Braille generation as structured text processing rather than
 image generation, because visual AI systems frequently reproduce Braille
 characters incorrectly.
-
