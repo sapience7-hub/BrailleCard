@@ -26,3 +26,24 @@ manifest. Run all gates with `pytest -q`. The generated G-code remains a file;
 printing, Braille review, tactile testing, and operator quality control are
 deliberately human steps documented inside the package.
 
+## How we built it
+
+BrailleCard was developed through an AI-assisted coding workflow using Codex,
+Claude Code, and Hermes. Hermes also allowed us to use free and locally
+hosted language models during development.
+
+These tools helped with planning, implementation, debugging, interface
+refinement, and testing. The application itself combines image handling,
+greeting-card layout, text input, and Braille translation in a simple
+workflow:
+
+1. Add a photo.
+2. Enter a personal message.
+3. Translate the message into Braille.
+4. Review the card layout.
+5. Save or print the finished design.
+
+We treated Braille generation as structured text processing rather than
+image generation, because visual AI systems frequently reproduce Braille
+characters incorrectly.
+
