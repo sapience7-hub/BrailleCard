@@ -52,6 +52,7 @@ def test_preview_emits_review_artifacts_without_production_outputs(tmp_path: Pat
         "submitted_to_printer": False,
         "print_started": False,
     }
+    assert manifest["artifacts"][0] == "original_input.svg"
     assert not {"card.gcode", "combined_card.stl", "combined_card.3mf"} & {
         path.name for path in preview.iterdir()
     }

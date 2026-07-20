@@ -31,7 +31,10 @@ def validate_preview_image(source: Path) -> None:
     """Validate the objective image constraints for the local preview slice."""
     suffix = source.suffix.lower()
     if suffix not in SUPPORTED:
-        raise ValueError(f"Unsupported image type: {suffix or '<none>'}")
+        supported = ", ".join(sorted(SUPPORTED))
+        raise ValueError(
+            f"Unsupported image type: {suffix or '<none>'}. Supported types: {supported}"
+        )
     if not source.is_file():
         raise ValueError(f"Image file does not exist: {source}")
     if suffix == ".svg":

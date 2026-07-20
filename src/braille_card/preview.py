@@ -31,9 +31,15 @@ def _load_card(card_config_path: Path) -> tuple[str, str]:
     greeting = greeting.strip()
     message = message.strip()
     if len(greeting) > MAX_GREETING_CHARACTERS:
-        raise ValueError(f"Greeting must not exceed {MAX_GREETING_CHARACTERS} characters")
+        raise ValueError(
+            f"Greeting must not exceed {MAX_GREETING_CHARACTERS} characters "
+            f"(got {len(greeting)})"
+        )
     if len(message) > MAX_MESSAGE_CHARACTERS:
-        raise ValueError(f"Message must not exceed {MAX_MESSAGE_CHARACTERS} characters")
+        raise ValueError(
+            f"Message must not exceed {MAX_MESSAGE_CHARACTERS} characters "
+            f"(got {len(message)})"
+        )
     return greeting, message
 
 
@@ -57,7 +63,7 @@ def _write_manifest(output_dir: Path, image_path: Path, greeting: str, message: 
             "message": message,
         },
         "artifacts": [
-            "original_input.<source extension>",
+            f"original_input{image_path.suffix.lower()}",
             "normalized_production.png",
             "visual_preview.png",
             "tactile_preview.png",
