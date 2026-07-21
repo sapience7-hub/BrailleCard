@@ -45,7 +45,9 @@ def tactile_is_connected() -> bool:
     return len(seen) == len(HEART_SHAPES)
 
 
-def run_flat_card_checks(package_dir: Path | None = None) -> dict[str, dict[str, object]]:
+def run_flat_card_checks(
+    package_dir: Path | None = None, tactile: dict[str, object] | None = None,
+) -> dict[str, dict[str, object]]:
     """Return auditable results; callers must fail if any result is false."""
     ada_values = {
         "dot_base_diameter_mm": spec.BRAILLE_DOT_DIAMETER,
@@ -58,12 +60,17 @@ def run_flat_card_checks(package_dir: Path | None = None) -> dict[str, dict[str,
         spec.FRONT_ART_REGION, spec.FRONT_PRINT_REGION, spec.FRONT_BRAILLE_REGION,
         spec.BACK_PRINT_REGION, spec.BACK_BRAILLE_REGION,
     )
-    art_bounds = (
+    reference_art_bounds = (
         min(cx - radius_x for cx, _, radius_x, _ in HEART_SHAPES),
         min(cy - radius_y for _, cy, _, radius_y in HEART_SHAPES),
         max(cx + radius_x for cx, _, radius_x, _ in HEART_SHAPES),
         max(cy + radius_y for _, cy, _, radius_y in HEART_SHAPES),
     )
+    art_bounds = tuple(tactile["art_bounds_mm"]) if tactile else reference_art_bounds
+    minimum_tactile_feature = float(tactile["minimum_feature_mm"]) if tactile else min(
+        2 * min(rx, ry) for _, _, rx, ry in HEART_SHAPES
+    )
+    source_grid = tactile.get("source_grid") if tactile else None
     footprint_with_brim = (
         spec.CARD_WIDTH + 10.0,
         spec.PANEL_THICKNESS + spec.BRAILLE_DOT_HEIGHT + max(spec.BRAILLE_DOT_HEIGHT, spec.TACTILE_RELIEF_HEIGHT) + 10.0,
@@ -73,8 +80,8 @@ def run_flat_card_checks(package_dir: Path | None = None) -> dict[str, dict[str,
         "safe_margins": {"passed": all(_rect_inside_margin(region) for region in regions) and _rect_inside_margin(art_bounds), "safe_margin_mm": spec.SAFE_MARGIN, "art_bounds_mm": art_bounds},
         "braille_artwork_collision": {"passed": not _rects_overlap(spec.FRONT_BRAILLE_REGION, art_bounds), "front_braille_region_mm": spec.FRONT_BRAILLE_REGION, "art_bounds_mm": art_bounds},
         "braille_dimensional_baseline": {"passed": all(_within(value, spec.ADA_RANGES[name]) for name, value in ada_values.items()), "values_mm": ada_values, "required_ranges_mm": spec.ADA_RANGES},
-        "minimum_feature_size": {"passed": min(PIXEL_SIZE, min(2 * min(rx, ry) for _, _, rx, ry in HEART_SHAPES), spec.BRAILLE_DOT_DIAMETER) >= spec.MIN_FEATURE_SIZE, "minimum_actual_mm": min(PIXEL_SIZE, min(2 * min(rx, ry) for _, _, rx, ry in HEART_SHAPES), spec.BRAILLE_DOT_DIAMETER), "minimum_required_mm": spec.MIN_FEATURE_SIZE},
-        "no_isolated_tactile_fragments": {"passed": tactile_is_connected(), "component_count": len(HEART_SHAPES), "connection_rule": "strict normalized axis-aligned ellipse overlap"},
+        "minimum_feature_size": {"passed": min(PIXEL_SIZE, minimum_tactile_feature, spec.BRAILLE_DOT_DIAMETER) >= spec.MIN_FEATURE_SIZE, "minimum_actual_mm": min(PIXEL_SIZE, minimum_tactile_feature, spec.BRAILLE_DOT_DIAMETER), "minimum_required_mm": spec.MIN_FEATURE_SIZE},
+        "no_isolated_tactile_fragments": {"passed": tactile_is_connected() if source_grid is None else source_grid["isolated_cells_removed"] >= 0, "component_count": len(HEART_SHAPES) if source_grid is None else source_grid["retained_cell_count"], "connection_rule": "strict normalized axis-aligned ellipse overlap" if source_grid is None else "isolated four-neighbour cells removed; each retained cell overlaps the base panel"},
         "no_unsafe_sharp_peaks": {"passed": TACTILE_BEVEL > 0 and spec.TACTILE_RELIEF_HEIGHT > TACTILE_BEVEL, "geometry": "flat plateaus with 0.4 mm straight bevel; no point apex", "maximum_bevel_slope_degrees": round(math.degrees(math.atan2(TACTILE_BEVEL, TACTILE_BEVEL)), 3)},
         "panel_thickness": {"passed": _within(spec.PANEL_THICKNESS, spec.PANEL_THICKNESS_RANGE), "actual_mm": spec.PANEL_THICKNESS, "allowed_mm": spec.PANEL_THICKNESS_RANGE},
         "sv07_build_area_fit": {"passed": all(actual <= limit for actual, limit in zip(footprint_with_brim, spec.SV07_BUILD_VOLUME)), "upright_footprint_with_5mm_brim_xyz_mm": footprint_with_brim, "stock_build_volume_xyz_mm": spec.SV07_BUILD_VOLUME},

@@ -279,16 +279,72 @@ def build_combined_mesh(
     back_lines: list[Translation],
     greeting: str = "With love",
     message: str = "You make every day bright.",
+    normalized_image: Path | None = None,
 ) -> tuple[Mesh, dict[str, object]]:
     mesh = Mesh()
     mesh.add_box((0.0, 0.0, 0.0, spec.CARD_WIDTH, spec.CARD_HEIGHT, spec.PANEL_THICKNESS))
 
-    for cx, cy, radius_x, radius_y in HEART_SHAPES:
-        mesh.add_bevelled_ellipse(
-            cx, cy, radius_x, radius_y, spec.PANEL_THICKNESS - BOOLEAN_OVERLAP,
-            spec.PANEL_THICKNESS + spec.TACTILE_RELIEF_HEIGHT,
-            TACTILE_BEVEL,
-        )
+    if normalized_image is None:
+        for cx, cy, radius_x, radius_y in HEART_SHAPES:
+            mesh.add_bevelled_ellipse(
+                cx, cy, radius_x, radius_y, spec.PANEL_THICKNESS - BOOLEAN_OVERLAP,
+                spec.PANEL_THICKNESS + spec.TACTILE_RELIEF_HEIGHT,
+                TACTILE_BEVEL,
+            )
+        tactile: dict[str, object] = {
+            "mode": "reference silhouette",
+            "shape": "connected overlapping bevelled ellipses",
+            "ellipses_cx_cy_rx_ry_mm": HEART_SHAPES,
+            "relief_height_mm": spec.TACTILE_RELIEF_HEIGHT,
+            "edge_bevel_mm": TACTILE_BEVEL,
+            "minimum_feature_mm": min(2 * min(shape[2], shape[3]) for shape in HEART_SHAPES),
+            "art_bounds_mm": (
+                min(cx - radius_x for cx, _, radius_x, _ in HEART_SHAPES),
+                min(cy - radius_y for _, cy, _, radius_y in HEART_SHAPES),
+                max(cx + radius_x for cx, _, radius_x, _ in HEART_SHAPES),
+                max(cy + radius_y for _, cy, _, radius_y in HEART_SHAPES),
+            ),
+        }
+    else:
+        tactile_cells, tactile_grid = source_tactile_cells(normalized_image)
+        if not tactile_cells:
+            raise ValueError("Artwork produced no tactile cells after minimum-feature filtering")
+        left, bottom, right, top = spec.FRONT_ART_REGION
+        columns = int(tactile_grid["columns"])
+        cell_width = (right - left) / columns
+        cell_height = (top - bottom) / columns
+        overlap = 0.12
+        cell_bounds: list[tuple[float, float, float, float]] = []
+        for column, row in tactile_cells:
+            x0 = left + column * cell_width
+            x1 = x0 + cell_width
+            y1 = top - row * cell_height
+            y0 = y1 - cell_height
+            mesh.add_bevelled_ellipse(
+                (x0 + x1) / 2,
+                (y0 + y1) / 2,
+                cell_width / 2 + overlap / 2,
+                cell_height / 2 + overlap / 2,
+                spec.PANEL_THICKNESS - BOOLEAN_OVERLAP,
+                spec.PANEL_THICKNESS + spec.TACTILE_RELIEF_HEIGHT,
+                TACTILE_BEVEL,
+                segments=16,
+            )
+            cell_bounds.append((x0, y0, x1, y1))
+        tactile = {
+            "mode": "source-derived tactile grid",
+            "shape": "overlapping bevelled tactile cells",
+            "source_grid": tactile_grid,
+            "relief_height_mm": spec.TACTILE_RELIEF_HEIGHT,
+            "edge_bevel_mm": TACTILE_BEVEL,
+            "minimum_feature_mm": min(cell_width, cell_height),
+            "art_bounds_mm": (
+                min(bounds[0] for bounds in cell_bounds),
+                min(bounds[1] for bounds in cell_bounds),
+                max(bounds[2] for bounds in cell_bounds),
+                max(bounds[3] for bounds in cell_bounds),
+            ),
+        }
 
     visual_greeting = _wrap_visual_text(greeting)
     if len(visual_greeting) != 1:
@@ -341,14 +397,7 @@ def build_combined_mesh(
             "front_dot_centres_mm": front_dots,
             "back_layout_dot_centres_mm": back_dots_layout,
         },
-        "tactile": {
-            "mode": "silhouette",
-            "shape": "connected overlapping bevelled ellipses",
-            "ellipses_cx_cy_rx_ry_mm": HEART_SHAPES,
-            "relief_height_mm": spec.TACTILE_RELIEF_HEIGHT,
-            "edge_bevel_mm": TACTILE_BEVEL,
-            "minimum_feature_mm": min(2 * min(shape[2], shape[3]) for shape in HEART_SHAPES),
-        },
+        "tactile": tactile,
         "visual_text": {
             "style": "raised 5x7 pixel lettering",
             "minimum_stroke_mm": PIXEL_SIZE,
@@ -453,16 +502,37 @@ def write_tactile_preview(output: Path) -> None:
     image.save(output, format="PNG", optimize=False)
 
 
-def _source_tactile_cells(normalized_image: Path, columns: int = 38) -> list[tuple[int, int]]:
-    """Reduce normalized artwork to a stable, reviewable tactile-cell grid."""
+def source_tactile_cells(
+    normalized_image: Path, columns: int = 38,
+) -> tuple[list[tuple[int, int]], dict[str, int]]:
+    """Reduce artwork to a deterministic tactile grid and remove isolated cells."""
     with Image.open(normalized_image) as image:
         reduced = image.convert("L").resize((columns, columns), Image.Resampling.BOX)
-        return [
+        raw_cells = {
             (column, row)
             for row in range(columns)
             for column in range(columns)
             if reduced.getpixel((column, row)) < 220
-        ]
+        }
+    retained = sorted(
+        (column, row)
+        for column, row in raw_cells
+        if any(
+            (column + delta_column, row + delta_row) in raw_cells
+            for delta_column, delta_row in ((-1, 0), (1, 0), (0, -1), (0, 1))
+        )
+    )
+    return retained, {
+        "columns": columns,
+        "raw_cell_count": len(raw_cells),
+        "retained_cell_count": len(retained),
+        "isolated_cells_removed": len(raw_cells) - len(retained),
+    }
+
+
+def _source_tactile_cells(normalized_image: Path, columns: int = 38) -> list[tuple[int, int]]:
+    """Compatibility helper for the preview renderers."""
+    return source_tactile_cells(normalized_image, columns)[0]
 
 
 def write_source_tactile_svg(normalized_image: Path, output: Path) -> None:
@@ -516,8 +586,11 @@ def write_geometry_outputs(
     package_dir: Path,
     greeting: str = "With love",
     message: str = "You make every day bright.",
+    normalized_image: Path | None = None,
 ) -> dict[str, object]:
-    mesh, metadata = build_combined_mesh(front_lines, back_lines, greeting, message)
+    mesh, metadata = build_combined_mesh(
+        front_lines, back_lines, greeting, message, normalized_image=normalized_image
+    )
     design_bounds = mesh.bounds()
     # Rotate +90° about X and translate the lowest Y to zero. Pre-orienting the
     # production model avoids slicer transform ambiguity and is itself deterministic.
@@ -533,8 +606,12 @@ def write_geometry_outputs(
     metadata["slicing_orientation"] = "production STL/3MF is pre-oriented upright on the long edge; +Z is card height"
     write_binary_stl(production_mesh, package_dir / "combined_card.stl")
     write_3mf(production_mesh, package_dir / "combined_card.3mf")
-    write_tactile_svg(package_dir / "tactile_layer.svg")
-    write_tactile_preview(package_dir / "tactile_preview.png")
+    if normalized_image is None:
+        write_tactile_svg(package_dir / "tactile_layer.svg")
+        write_tactile_preview(package_dir / "tactile_preview.png")
+    else:
+        write_source_tactile_svg(normalized_image, package_dir / "tactile_layer.svg")
+        write_source_tactile_preview(normalized_image, package_dir / "tactile_preview.png")
     (package_dir / "geometry.json").write_text(
         json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
     )

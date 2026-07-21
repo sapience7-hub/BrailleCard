@@ -164,13 +164,7 @@ def _manifest(
             "line_to_line_spacing_mm": spec.BRAILLE_LINE_SPACING,
             "dot_height_mm": spec.BRAILLE_DOT_HEIGHT,
         },
-        "tactile": {
-            "mode": "silhouette",
-            "subject": "heart",
-            "relief_height_mm": spec.TACTILE_RELIEF_HEIGHT,
-            "edge_treatment": "0.4 mm straight bevel with flat plateau",
-            "isolated_fragments": 0,
-        },
+        "tactile": geometry["tactile"],
         "printer_profile": {
             "machine": spec.SV07_PROFILE_NAME,
             "stock_build_volume_xyz_mm": spec.SV07_BUILD_VOLUME,
@@ -246,12 +240,13 @@ def generate_package(
         output_dir / "layout.pdf",
     )
     geometry = write_geometry_outputs(
-        front_lines, back_lines, output_dir, greeting=greeting, message=message
+        front_lines, back_lines, output_dir, greeting=greeting, message=message,
+        normalized_image=normalized,
     )
     gcode = slice_card(output_dir / "combined_card.stl", output_dir / "card.gcode", slicer_root)
     _write_operator_documents(output_dir)
 
-    checks = run_flat_card_checks(output_dir)
+    checks = run_flat_card_checks(output_dir, tactile=geometry["tactile"])
     assert_checks_pass(checks)
     (output_dir / "checks.json").write_text(
         json.dumps(checks, indent=2, sort_keys=True) + "\n",

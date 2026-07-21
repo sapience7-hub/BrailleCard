@@ -1,7 +1,8 @@
 import pytest
+from PIL import Image, ImageDraw
 
 from braille_card import spec
-from braille_card.geometry import Mesh, build_combined_mesh
+from braille_card.geometry import Mesh, build_combined_mesh, source_tactile_cells
 from braille_card.braille import wrap_source
 
 
@@ -31,3 +32,31 @@ def test_combined_geometry_is_one_boolean_solid() -> None:
     assert mesh.bounds()[2] == pytest.approx(-0.75)
     assert mesh.bounds()[5] == pytest.approx(2.8)
 
+
+def test_source_artwork_controls_tactile_geometry(tmp_path) -> None:
+    white = tmp_path / "white.png"
+    artwork = tmp_path / "artwork.png"
+    Image.new("L", (1200, 1200), 255).save(white)
+    image = Image.new("L", (1200, 1200), 255)
+    ImageDraw.Draw(image).rectangle((450, 450, 750, 750), fill=0)
+    image.save(artwork)
+
+    white_cells, white_grid = source_tactile_cells(white)
+    source_cells, source_grid = source_tactile_cells(artwork)
+    assert white_cells == []
+    assert white_grid["retained_cell_count"] == 0
+    assert source_grid["retained_cell_count"] > 0
+    assert source_grid["isolated_cells_removed"] == 0
+
+    mesh, metadata = build_combined_mesh(
+        wrap_source("With love", 16), wrap_source("You make every day bright.", 16),
+        normalized_image=artwork,
+    )
+    assert metadata["tactile"]["mode"] == "source-derived tactile grid"
+    assert metadata["tactile"]["source_grid"] == source_grid
+    assert mesh.bounds()[5] == pytest.approx(2.8)
+
+    _, legacy = build_combined_mesh(
+        wrap_source("With love", 16), wrap_source("You make every day bright.", 16),
+    )
+    assert legacy["tactile"]["mode"] == "reference silhouette"
