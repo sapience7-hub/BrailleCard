@@ -21,6 +21,9 @@ def test_home_shows_local_preview_form(client) -> None:
 
     assert response.status_code == 200
     assert b"Create a Tactile Card Preview" in response.data
+    assert b'<div class="workspace">' in response.data
+    assert b"<h2>Input</h2>" in response.data
+    assert b">Output</span>" in response.data
     assert b"Safety boundary" in response.data
     assert b"never uploads or starts a printer job" in response.data
 
