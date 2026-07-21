@@ -1,0 +1,15 @@
+[Unit]
+Description=BrailleCard public resting page
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/tangoren/projects/braille-greeting-cards
+ExecStart=/usr/bin/python3 -m http.server 8767 --bind 127.0.0.1 --directory /home/tangoren/projects/braille-greeting-cards/public/resting
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

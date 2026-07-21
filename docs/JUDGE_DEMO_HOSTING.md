@@ -17,6 +17,17 @@ The public demo and the private operator workspace are separate processes:
 The current app is local-only. This document is a deployment design, not an
 authorization to publish it.
 
+## Current public placeholder
+
+`braillecard.dorqlabs.com` is now routed through the existing `dashboards`
+tunnel to a loopback-only static service. It serves the public-safe “BrailleCard
+is resting” page from `public/resting/`, including verified UEB Grade 1
+(uncontracted) Braille for that message; the corresponding user-service unit is
+versioned at `deploy/braillecard-resting.service`.
+
+This placeholder deliberately has no application routes. Replacing it with the
+judge demo requires the public-isolation checks below.
+
 ## Lowest-ceremony implementation
 
 1. Add a demo mode that serves a pre-generated example job and disables every
