@@ -1,0 +1,15 @@
+[Unit]
+Description=BrailleCard public judge demo (static, read-only)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/tangoren/projects/braille-greeting-cards
+ExecStart=/usr/bin/python3 -m http.server 8768 --bind 127.0.0.1 --directory /home/tangoren/projects/braille-greeting-cards/public/demo
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

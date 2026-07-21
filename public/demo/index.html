@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071a2f">
+  <meta name="robots" content="noindex">
+  <title>BrailleCard Judge Demo</title>
+  <style>
+    :root{color-scheme:dark;--ink:#f7ead1;--gold:#e9b95f;--pine:#80a885;--paper:#071a2f;--card:#0e2a43;--field:#0a2136;--line:#466674;--warn:#f0c773;--warn-bg:#132f47;--muted:#bdd0cf}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:ui-sans-serif,system-ui,sans-serif;line-height:1.5}
+    a{color:#f6d681}a:focus-visible{outline:3px solid #f6d681;outline-offset:3px}
+    .skip{position:absolute;left:-999px}.skip:focus-visible{left:1rem;top:1rem;background:var(--card);padding:.5rem;z-index:2}
+    .shell{max-width:64rem;margin:auto;padding:1.5rem 1rem 4rem}
+    .mast{border-bottom:1px solid var(--line);padding-bottom:1rem}
+    .brand-lockup{display:block;width:clamp(7rem,13vw,10rem);margin-bottom:1rem}
+    .brand-lockup img{display:block;width:100%;height:auto}
+    .mast h1{font-family:Georgia,serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:500;letter-spacing:-.04em;line-height:1;margin:.2rem 0 .5rem}
+    .kicker{color:var(--gold);font-weight:750;letter-spacing:.1em;text-transform:uppercase;font-size:.76rem}
+    .notice{border:1px solid var(--warn);background:var(--warn-bg);border-radius:.55rem;padding:1rem;margin:1.25rem 0}
+    .proof-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(14rem,.85fr);gap:1rem;margin-top:1.25rem}
+    .card-panel{background:var(--card);border:1px solid var(--line);border-radius:.75rem;padding:1.15rem;min-width:0}
+    .card-panel h2,.card-panel h3{margin-top:0}
+    .art{width:100%;height:auto;border:1px solid var(--line);background:#fff;display:block}
+    .side-stack{display:grid;gap:1rem}
+    .links{display:flex;flex-wrap:wrap;gap:.55rem;padding:0;list-style:none;margin:.5rem 0 0}
+    .links a{padding:.45rem .65rem;border:1px solid var(--line);border-radius:.35rem;background:var(--field)}
+    .muted{color:var(--muted)}
+    .status-list{padding-left:1.1rem}
+    @media(max-width:760px){.proof-grid{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <main id="main" class="shell">
+    <header class="mast">
+      <a class="brand-lockup" href="https://dorqlabs.com/" aria-label="Dorq Labs home"><img src="assets/dorq-labs-lockup.png" width="600" height="170" alt="Dorq Labs"></a>
+      <p class="kicker">Read-only judge demo</p>
+      <h1>BrailleCard</h1>
+      <p>One pre-generated sample card, shown for review only.</p>
+    </header>
+
+    <section class="notice" aria-live="polite">
+      <strong>This is a static, read-only demo.</strong> There is no upload
+      form, no printer connection, and no way to submit a job from this page.
+      The interactive card studio and physical SV07 printer are only reachable
+      from the operator's private workspace, never through this public page.
+    </section>
+
+    <div class="proof-grid">
+      <article class="card-panel">
+        <h2>Visual Layout</h2>
+        <img class="art" width="658" height="406" src="artifacts/visual_preview.png" alt="Front and back visual card preview for the sample greeting &quot;With love&quot; / &quot;You make every day bright.&quot;">
+      </article>
+      <div class="side-stack">
+        <article class="card-panel">
+          <h3>Tactile Preview</h3>
+          <p class="muted">Derived from the sample artwork for review; it is not printable geometry.</p>
+          <img class="art" width="381" height="508" loading="lazy" src="artifacts/tactile_preview.png" alt="Source-derived tactile interpretation preview of a heart">
+        </article>
+        <article class="card-panel">
+          <h3>Braille Review</h3>
+          <p class="muted">Source text, Unicode Braille, and BRF side by side.</p>
+          <p><a href="artifacts/braille_review.html">Open Braille review</a></p>
+        </article>
+      </div>
+    </div>
+
+    <article class="card-panel" style="margin-top:1rem">
+      <h3>Review status</h3>
+      <ul class="status-list muted">
+        <li>Braille transcription: not yet human-reviewed</li>
+        <li>Tactile tester evaluation: not completed</li>
+        <li>Visual layout: not approved</li>
+        <li>Printer contacted: no &middot; print started: no</li>
+      </ul>
+    </article>
+
+    <article class="card-panel" style="margin-top:1rem">
+      <h3>Sample artifacts</h3>
+      <ul class="links">
+        <li><a href="artifacts/braille_source.txt">braille_source.txt</a></li>
+        <li><a href="artifacts/braille_ueb_unicode.txt">braille_ueb_unicode.txt</a></li>
+        <li><a href="artifacts/braille_ueb.brf">braille_ueb.brf</a></li>
+        <li><a href="artifacts/tactile_layer.svg">tactile_layer.svg</a></li>
+      </ul>
+      <p class="muted" style="margin-top:1rem">Source: <a href="https://github.com/sapience7-hub/BrailleCard">github.com/sapience7-hub/BrailleCard</a></p>
+    </article>
+  </main>
+</body>
+</html>

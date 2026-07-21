@@ -65,6 +65,9 @@ recorded without tokens; status uses only printer-object queries.
 ## 5. Public hosting — deferred
 
 **Goal:** Host the public GUI at `braillecard.dorqlabs.com` through Cloudflare.
+A separate, narrower static read-only judge demo is already live at that
+hostname — see `docs/JUDGE_DEMO_HOSTING.md`. It has no create/review/upload
+routes and is not the interactive public GUI this step describes.
 
 **Safety gate:** The public service cannot obtain Moonraker credentials or run
 OrcaSlicer. It may create/review jobs and communicate only with a private,
