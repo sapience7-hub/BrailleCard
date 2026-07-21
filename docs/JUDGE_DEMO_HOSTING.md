@@ -33,6 +33,19 @@ No public uploads are needed for judges. This avoids accounts, quotas,
 retention handling, and a public job store while still giving them a working,
 interactive artifact review.
 
+## Add later subdomains without dashboard clicks
+
+The existing authenticated `dashboards` tunnel can create a single DNS route
+without a Cloudflare API key:
+
+```sh
+scripts/add-dorqlabs-hostname.sh example
+```
+
+The helper rejects invalid names, never overwrites an existing DNS record, and
+does not change tunnel ingress or deploy a service. Add and verify a
+hostname-specific ingress rule separately before exposing a real application.
+
 ## Required public isolation checks
 
 - Public routes have no upload, slicing, Moonraker, printer-status, upload, or
