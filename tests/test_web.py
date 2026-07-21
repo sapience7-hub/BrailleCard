@@ -20,12 +20,16 @@ def test_home_shows_local_preview_form(client) -> None:
     response = client.get("/")
 
     assert response.status_code == 200
-    assert b"Create a Tactile Card Preview" in response.data
+    assert b"Live Card Draft" in response.data
     assert b'<div class="workspace">' in response.data
     assert b"<h2>Input</h2>" in response.data
     assert b">Output</span>" in response.data
     assert b"Safety boundary" in response.data
     assert b"never uploads or starts a printer job" in response.data
+    assert b'id="studio-form"' in response.data
+    assert b'id="draft-artwork"' in response.data
+    assert b"Draft only" in response.data
+    assert b"URL.createObjectURL" in response.data
 
 
 def test_preview_job_persists_generated_artifacts(client, tmp_path: Path, monkeypatch) -> None:

@@ -49,6 +49,9 @@ PAGE = """<!doctype html>
     :root{color-scheme:dark;--ink:#f7ead1;--gold:#e9b95f;--pine:#80a885;--paper:#071a2f;--card:#0e2a43;--field:#0a2136;--line:#466674;--warn:#f0c773;--warn-bg:#132f47;--bad:#ffb4a9;--focus:#f6d681;--muted:#bdd0cf}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:ui-sans-serif,system-ui,sans-serif;line-height:1.5}a{color:#f6d681}a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--focus);outline-offset:3px}.skip{position:absolute;left:-999px}.skip:focus-visible{left:1rem;top:1rem;background:var(--card);padding:.5rem;z-index:2}.shell{max-width:92rem;margin:auto;padding:1.5rem 1rem 4rem}.mast{border-bottom:1px solid var(--line);padding-bottom:1rem}.brand-lockup{display:block;width:clamp(7rem,13vw,10rem);margin-bottom:1rem}.brand-lockup img{display:block;width:100%;height:auto}.mast h1{font-family:Georgia,serif;font-size:clamp(2rem,4vw,3.3rem);font-weight:500;letter-spacing:-.045em;line-height:1;margin:.2rem 0 .5rem}.mast p{margin:.4rem 0}.kicker{color:var(--gold);font-weight:750;letter-spacing:.1em;text-transform:uppercase;font-size:.76rem}.notice{border:1px solid var(--warn);background:var(--warn-bg);border-radius:.55rem;padding:1rem;margin:1.25rem 0}.error{border-color:var(--bad);color:var(--bad)}.workspace{display:grid;grid-template-columns:minmax(17rem,23rem) minmax(0,1fr);gap:1.25rem;align-items:start}.panel{background:var(--card);border:1px solid var(--line);border-radius:.75rem;padding:1.15rem;min-width:0}.inputs{position:sticky;top:1rem}.inputs h2,.output h2,.output h3{margin-top:0}.input-intro{color:var(--muted);font-size:.92rem;margin-top:0}.file-field{border:1px dashed var(--gold);border-radius:.5rem;color:var(--gold);cursor:pointer;display:block;font-weight:700;margin-top:1rem;padding:.8rem}.file-field input{display:block;margin-top:.5rem}.field-label{display:block;font-weight:650;margin-top:1rem}input,textarea{color:var(--ink);font:inherit;width:100%;padding:.65rem;border:1px solid var(--line);border-radius:.4rem;background:var(--field)}input[type=checkbox]{width:auto;margin-right:.5rem}textarea{min-height:7rem;resize:vertical}small{color:var(--muted);display:block;margin-top:.35rem}button{margin-top:1rem;background:var(--pine);color:#061a2c;border:0;border-radius:.45rem;padding:.7rem 1rem;font:inherit;font-weight:750;cursor:pointer}button:hover{background:var(--gold)}.output-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:1rem}.output-head p{color:var(--muted);font-size:.9rem;margin:0}.proof-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(14rem,.75fr);gap:1rem}.card-panel{background:var(--field);border:1px solid var(--line);border-radius:.55rem;padding:1rem}.card-panel h3{font-size:1rem}.art{width:100%;height:auto;border:1px solid var(--line);background:#fff}.side-stack{display:grid;gap:1rem}.stage-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.65rem}.stage{padding:.65rem;border-left:4px solid var(--gold);background:var(--field)}.stage strong{display:block}.links{display:flex;flex-wrap:wrap;gap:.55rem;padding:0;list-style:none}.links a{padding:.45rem .65rem;border:1px solid var(--line);border-radius:.35rem;background:var(--field)}.muted{color:var(--muted)}.empty{align-content:center;display:grid;min-height:38rem;text-align:center}.empty .card-outline{aspect-ratio:3/4;border:1px dashed var(--gold);border-radius:.4rem;margin:1rem auto;width:min(14rem,70%);background:linear-gradient(145deg,#112f48,#0a2136)}@media(max-width:760px){.workspace{grid-template-columns:1fr}.inputs{position:static}.proof-grid{grid-template-columns:1fr}.empty{min-height:24rem}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
   </style>
+  <style>
+    .draft-output{min-height:38rem}.draft-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(13rem,.56fr);gap:1rem;align-items:center}.draft-card{aspect-ratio:3/4;background:#f7ead1;border:1px solid var(--gold);border-radius:.45rem;box-shadow:0 .7rem 1.8rem #020b16aa;color:#071a2f;display:flex;flex-direction:column;margin:auto;max-width:23rem;overflow:hidden;width:100%}.draft-art{align-items:center;background:linear-gradient(145deg,#b9d3d2,#6c9096);color:#173348;display:flex;flex:1;justify-content:center;min-height:0;position:relative}.draft-art img{height:100%;object-fit:cover;width:100%}.draft-art[data-empty=true]::after{border:1px dashed #315d6c;content:"Artwork preview";font-size:.85rem;font-weight:700;letter-spacing:.06em;padding:.5rem .7rem;text-transform:uppercase}.draft-copy{padding:1rem 1rem 1.15rem}.draft-greeting{font-family:Georgia,serif;font-size:clamp(1.35rem,3vw,2rem);font-weight:700;line-height:1.05;margin:0 0 .55rem;overflow-wrap:anywhere}.draft-message{font-size:.92rem;line-height:1.35;margin:0;overflow-wrap:anywhere}.draft-note{background:var(--field);border:1px solid var(--line);border-radius:.55rem;padding:1rem}.draft-note h3{margin:.1rem 0 .5rem}.draft-note p{margin:.5rem 0}.draft-note .kicker{display:block;margin-bottom:.7rem}@media(max-width:760px){.draft-output{min-height:0}.draft-grid{grid-template-columns:1fr}.draft-card{max-width:19rem}}
+  </style>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -57,7 +60,7 @@ PAGE = """<!doctype html>
     <section class="notice" aria-live="polite"><strong>Safety boundary.</strong> Braille requires human review. Preview, approval, and local slicing are separate; this workspace never uploads or starts a printer job.</section>
     {% if error %}<section class="notice error" role="alert"><strong>Can’t create preview.</strong> {{ error }}</section>{% endif %}
     <div class="workspace">
-      <form class="panel inputs" method="post" action="{{ url_for('create_job') }}" enctype="multipart/form-data">
+      <form id="studio-form" class="panel inputs" method="post" action="{{ url_for('create_job') }}" enctype="multipart/form-data">
         <h2>Input</h2><p class="input-intro">Create a new local proof. It appears alongside these controls.</p>
         <label class="file-field" for="image">Choose artwork<input id="image" name="image" type="file" accept=".png,.jpg,.jpeg,.webp,.svg,image/png,image/jpeg,image/webp,image/svg+xml" required></label><small>PNG, JPEG, WebP, or SVG. Raster images: 600 × 600 pixels minimum, 15 MB maximum.</small>
         <label class="field-label" for="greeting">Front Greeting</label><input id="greeting" name="greeting" maxlength="9" autocomplete="off" value="{{ job.input.greeting if job and job.input is defined else '' }}" required><small>Up to 9 characters on the 3 × 4 inch portrait card.</small>
@@ -71,10 +74,49 @@ PAGE = """<!doctype html>
           <article class="card-panel"><h3>Saved Artifacts</h3><ul class="links">{% for name in job.artifacts %}<li><a href="{{ url_for('artifact', job_id=job.job_id, name=name) }}">{{ name }}</a></li>{% endfor %}</ul></article>
         </section>
       {% else %}
-        <section class="panel output empty" aria-labelledby="output-title"><span class="kicker">Output</span><h2 id="output-title">Create a Tactile Card Preview</h2><p class="muted">Your visual layout, tactile interpretation, and UEB review will appear here after you submit the input.</p><div class="card-outline" aria-hidden="true"></div></section>
+        <section class="panel output draft-output" aria-labelledby="output-title"><div class="output-head"><div><h2 id="output-title">Live Card Draft</h2><p>Updates stay in this browser until you create the local preview.</p></div><span class="kicker">Output</span></div><div class="draft-grid"><article class="draft-card" aria-label="Live visual card draft"><div id="draft-art" class="draft-art" data-empty="true"><img id="draft-artwork" alt="Selected artwork preview" hidden></div><div class="draft-copy"><p id="draft-greeting" class="draft-greeting">Front greeting</p><p id="draft-message" class="draft-message">Back message</p></div></article><aside class="draft-note"><span class="kicker">Draft only</span><h3>Visual layout</h3><p class="muted">This is a visual composition aid for the 3 × 4 inch portrait card. It is not a tactile interpretation or UEB proof.</p><p class="muted">Create Local Preview to generate the saved visual, tactile, and Grade 1 UEB review artifacts.</p></aside></div></section>
       {% endif %}
     </div>
   </main>
+  <script>
+    (() => {
+      const form = document.getElementById("studio-form");
+      const image = document.getElementById("image");
+      const greeting = document.getElementById("greeting");
+      const message = document.getElementById("message");
+      const artwork = document.getElementById("draft-artwork");
+      const artFrame = document.getElementById("draft-art");
+      const draftGreeting = document.getElementById("draft-greeting");
+      const draftMessage = document.getElementById("draft-message");
+      if (!form || !image || !greeting || !message || !artwork || !artFrame || !draftGreeting || !draftMessage) return;
+
+      let objectUrl = null;
+      const updateText = () => {
+        draftGreeting.textContent = greeting.value.trim() || "Front greeting";
+        draftMessage.textContent = message.value.trim() || "Back message";
+      };
+      const updateArtwork = () => {
+        const file = image.files && image.files[0];
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        objectUrl = null;
+        if (!file || !file.type.startsWith("image/")) {
+          artwork.hidden = true;
+          artwork.removeAttribute("src");
+          artFrame.dataset.empty = "true";
+          return;
+        }
+        objectUrl = URL.createObjectURL(file);
+        artwork.src = objectUrl;
+        artwork.hidden = false;
+        artFrame.dataset.empty = "false";
+      };
+      greeting.addEventListener("input", updateText);
+      message.addEventListener("input", updateText);
+      image.addEventListener("change", updateArtwork);
+      window.addEventListener("beforeunload", () => { if (objectUrl) URL.revokeObjectURL(objectUrl); });
+      updateText();
+    })();
+  </script>
 </body></html>"""
 
 
