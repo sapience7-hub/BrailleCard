@@ -2,14 +2,84 @@
 handoff_version: 1
 project: Braille Greeting Cards
 project_root: /home/tangoren/projects/braille-greeting-cards
-updated_at: 2026-07-20T00:00:00-04:00
-status: ready
-branch: feat/braille-preview-render
-head: 317174ca9887c9f1bec7cf287195203b294aba90
+updated_at: 2026-07-20T23:58:55-04:00
+status: in-progress
+branch: feat/browser-print-workflow
+head: f7d6832eb7f2568103c83050c24338f0b816b634
 obsidian_note: /home/tangoren/Obsidian on DGX/Dev Logs/Handoffs/Braille Greeting Cards.md
 ---
 
 # Braille Greeting Cards — Handoff
+
+## Closedown update — 2026-07-20
+
+### Objective
+
+Finish the local BrailleCard Studio and its accompanying demonstration work
+without exposing printer control publicly. The user explicitly reports that the
+video deliverable is still unfinished; do not represent the project as done.
+
+### Resume state
+
+- Current status: Studio code is complete and machine-checked; the video remains
+  outstanding.
+- Working tree: clean after commit `f7d6832`.
+- Active goal: none.
+- Last safe checkpoint: `f7d6832` — `feat(web): add live studio card draft`.
+
+### Runtime state
+
+| Component | State | Session action | Reason / check command |
+| --- | --- | --- | --- |
+| `braillecard-resting.service` | active | unchanged | Public resting page remains the safe public surface. |
+| SV07 Moonraker | inactive print, last state cancelled | read status only | `print_stats`/`virtual_sdcard` showed no active job. |
+| Crowsnest camera service | running | restarted once, then configuration restored | Camera 2 is stored in Moonraker as `Nozzle`, rotated 180° for compatible viewers; raw JPEG remains unrotated. |
+
+### Completed this session
+
+- Committed a left-input/right-output Studio with a live browser-only 3 × 4
+  portrait visual draft. Typed greeting/message and selected artwork stay local
+  until the normal preview form submission.
+- Retained server-generated visual, tactile, and Grade 1 UEB review artifacts
+  as the authoritative proof after submission.
+- Confirmed the public resting page contains no printer connection or personal
+  card data.
+
+### Decisions and constraints
+
+- The Studio remains local-only. Public hosting is limited to the resting/judge
+  surface until an explicitly isolated read-only demo is designed.
+- Camera observation is not part of BrailleCard yet. Moonraker metadata labels
+  Camera 2 as `Nozzle` with a 180° display rotation; do not treat that as an
+  embedded project capability.
+- Never upload or start a printer job from this browser workflow.
+
+### Changed files
+
+- `src/braille_card/web.py` — live local card draft and client-side artwork/text preview.
+- `tests/test_web.py` — coverage for the live Studio draft markup.
+
+### Verification
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `rtk .venv/bin/python -m pytest -q` | PASS | 30 passed; one existing ReportLab deprecation warning. |
+| `rtk git diff --check` | PASS | No whitespace errors. |
+
+### Remaining work
+
+- Create the outstanding video deliverable. Its intended audience/content was
+  not specified during closeout, so confirm that scope before producing it.
+
+### Blockers and risks
+
+- Human UEB, tactile, visual, and physical-print review remains required before
+  production claims.
+
+### Next action
+
+Confirm the video’s target audience and format, then produce that video from
+the completed Studio/resting-page state.
 
 ## Current local-render slice — 2026-07-20
 
