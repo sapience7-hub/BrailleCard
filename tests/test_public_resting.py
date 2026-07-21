@@ -11,7 +11,8 @@ def test_public_resting_page_uses_verified_uncontracted_ueb() -> None:
     )
 
     assert translate("BrailleCard is resting.").unicode in page
-    assert "UEB Grade 1 (uncontracted)" in page
-    assert "no printer connection or personal-card data" in page
+    assert "Uncontracted Unified English Braille" in page
+    assert "UEB Grade 1 (uncontracted)" not in page
+    assert "no printer connection or personal-card data" not in page
     assert "bedtime-illustration.png" in page
     assert "white-space:nowrap" in page
