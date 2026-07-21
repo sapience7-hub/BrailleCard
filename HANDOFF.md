@@ -215,6 +215,22 @@ implementation slice (deterministic local render) for approval before coding.
 
 ## Detailed run record
 
+## 2026-07-21 reference-card front-face photo evidence
+
+The user shared three phone photos of the cooled, physical front face of the
+`examples/card.json` reference card ("With love" greeting, heart subject),
+saved at `docs/photos/reference-card-test-print/` with SHA-256 checksums
+recorded in that directory's `README.md`. The photos show the raised "WITH
+LOVE" print text, the connected heart tactile silhouette, and a Braille cell,
+photographed at a low raking angle to bring out the relief.
+
+This is photo evidence only, logged as a record that a physical test print
+exists — it does **not** establish caliper-measured dot/cell/line spacing or
+dot height against the ADA ranges, a qualified Braille reviewer's read of the
+physical dots, tactile-tester evaluation, or inspection of layer adhesion,
+warping, or support-removal marks. No `QUALITY_CONTROL.md` item is marked
+complete on the basis of these photos.
+
 ## 2026-07-19 one-off Flat v4 physical run
 
 The user explicitly authorized one physical print of
