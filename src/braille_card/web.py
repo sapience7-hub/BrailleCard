@@ -15,6 +15,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
 from .moonraker import MoonrakerClient, MoonrakerError
+from .package import generate_package
 from .preview import generate_preview
 
 ARTIFACT_NAMES = {
@@ -28,6 +29,15 @@ ARTIFACT_NAMES = {
     "render_manifest.json",
 }
 
+PRODUCTION_ARTIFACT_NAMES = {
+    "card.gcode",
+    "combined_card.3mf",
+    "combined_card.stl",
+    "checks.json",
+    "geometry.json",
+    "manifest.json",
+}
+
 PAGE = """<!doctype html>
 <html lang="en">
 <head>
@@ -38,23 +48,24 @@ PAGE = """<!doctype html>
   <style>
     :root{color-scheme:dark;--ink:#f7ead1;--gold:#e9b95f;--pine:#6f9b7e;--paper:#071a2f;--card:#0e2a43;--line:#466674;--warn:#f0c773;--warn-bg:#132f47;--bad:#ffb4a9;--focus:#f6d681;--muted:#bdd0cf}
     *{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);font:system-ui,sans-serif;line-height:1.5} a{color:#f6d681} a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
-    .skip{position:absolute;left:-999px}.skip:focus-visible{left:1rem;top:1rem;background:var(--card);padding:.5rem;z-index:2}.shell{max-width:72rem;margin:auto;padding:2rem 1rem 4rem}.mast{border-bottom:1px solid var(--line);padding-bottom:1rem}.kicker{color:var(--gold);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}.notice{border:2px solid var(--warn);background:var(--warn-bg);padding:1rem;margin:1.5rem 0}.error{border-color:var(--bad);color:var(--bad)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:1rem}.card{background:var(--card);border:1px solid var(--line);border-radius:.75rem;padding:1.25rem;min-width:0}.wide{grid-column:1/-1}label{display:block;font-weight:650;margin-top:.8rem}input,textarea{color:var(--ink);font:inherit;width:100%;padding:.65rem;border:1px solid var(--line);border-radius:.4rem;background:#0a2136}textarea{min-height:7rem;resize:vertical}small{color:var(--muted)}button{margin-top:1rem;background:var(--pine);color:#061a2c;border:0;border-radius:.45rem;padding:.7rem 1rem;font:inherit;font-weight:750;cursor:pointer}button:hover{background:var(--gold)}.stage{padding:.65rem;border-left:4px solid var(--gold);background:#0a2136}.stage strong{display:block}.art{width:100%;height:auto;border:1px solid var(--line);background:#fff}.links{display:flex;flex-wrap:wrap;gap:.75rem;padding:0;list-style:none}.links a{padding:.45rem .65rem;border:1px solid var(--line);border-radius:.35rem;background:#0a2136}.muted{color:var(--muted)}@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+    .skip{position:absolute;left:-999px}.skip:focus-visible{left:1rem;top:1rem;background:var(--card);padding:.5rem;z-index:2}.shell{max-width:72rem;margin:auto;padding:2rem 1rem 4rem}.mast{border-bottom:1px solid var(--line);padding-bottom:1rem}.kicker{color:var(--gold);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}.notice{border:2px solid var(--warn);background:var(--warn-bg);padding:1rem;margin:1.5rem 0}.error{border-color:var(--bad);color:var(--bad)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:1rem}.card{background:var(--card);border:1px solid var(--line);border-radius:.75rem;padding:1.25rem;min-width:0}.wide{grid-column:1/-1}label{display:block;font-weight:650;margin-top:.8rem}input,textarea{color:var(--ink);font:inherit;width:100%;padding:.65rem;border:1px solid var(--line);border-radius:.4rem;background:#0a2136}input[type=checkbox]{width:auto;margin-right:.5rem}textarea{min-height:7rem;resize:vertical}small{color:var(--muted)}button{margin-top:1rem;background:var(--pine);color:#061a2c;border:0;border-radius:.45rem;padding:.7rem 1rem;font:inherit;font-weight:750;cursor:pointer}button:hover{background:var(--gold)}.stage{padding:.65rem;border-left:4px solid var(--gold);background:#0a2136}.stage strong{display:block}.art{width:100%;height:auto;border:1px solid var(--line);background:#fff}.links{display:flex;flex-wrap:wrap;gap:.75rem;padding:0;list-style:none}.links a{padding:.45rem .65rem;border:1px solid var(--line);border-radius:.35rem;background:#0a2136}.muted{color:var(--muted)}@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
   </style>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <main id="main" class="shell">
     <header class="mast"><p class="kicker">Local-only workspace</p><h1>BrailleCard Studio</h1><p>Preview, slice, and print are separate operator-controlled stages.</p></header>
-    <section class="notice" aria-live="polite"><strong>Preview only.</strong> Braille is not yet human-reviewed. No printer contacted, upload, or start occurs during rendering.</section>
+    <section class="notice" aria-live="polite"><strong>Safety boundary.</strong> Braille requires human review. Preview, approval, and local slicing are separate; this workspace never uploads or starts a printer job.</section>
     {% if error %}<section class="notice error" role="alert"><strong>Can’t create preview.</strong> {{ error }}</section>{% endif %}
     {% if job %}
       <h2>Preview Ready</h2>
-      <p class="muted">Saved local job {{ job.job_id }}. The retained artifacts are shown below; no production action has occurred.</p>
+      <p class="muted">Saved local job {{ job.job_id }}. The retained artifacts are shown below; no printer action has occurred.</p>
+      {% if job.action_message %}<section class="notice" aria-live="polite">{{ job.action_message }}</section>{% endif %}
       <div class="grid">
         <article class="card wide"><h3>Visual Layout</h3><img class="art" width="1064" height="711" fetchpriority="high" src="{{ url_for('artifact', job_id=job.job_id, name='visual_preview.png') }}" alt="Front and back visual card preview"></article>
         <article class="card"><h3>Tactile Preview</h3><p class="muted">Derived from the uploaded artwork for review; it is not printable geometry.</p><img class="art" width="635" height="889" loading="lazy" src="{{ url_for('artifact', job_id=job.job_id, name='tactile_preview.png') }}" alt="Source-derived tactile interpretation preview"></article>
         <article class="card"><h3>Braille Review</h3><p>Review source text, Unicode Braille, and BRF before any print approval.</p><p><a href="{{ url_for('artifact', job_id=job.job_id, name='braille_review.html') }}">Open side-by-side Braille review</a></p></article>
-        <article class="card wide"><h3>Production Controls · Sovol SV07</h3><div class="grid"><div class="stage"><strong>1. Preview</strong>Complete</div><div class="stage"><strong>2. Source Geometry</strong>Available after human production approval</div><div class="stage"><strong>3. Offline Slice</strong>Unavailable until an approved production package exists</div><div class="stage"><strong>4. Remote Observation</strong>{% if job.remote_status %}{% if job.remote_status.connected %}Read-only check completed {{ job.remote_status.checked_at }}{% else %}{{ job.remote_status.message }}{% endif %}{% else %}Not checked{% endif %}</div></div><p class="muted">Slicer, printer, and remote options remain separate. Previewing cannot trigger them.</p>{% if job.remote_status and job.remote_status.connected %}<p class="muted">Klipper: {{ job.remote_status.klipper_state }} · Print: {{ job.remote_status.print_state }}{% if job.remote_status.filename %} · {{ job.remote_status.filename }}{% endif %}{% if job.remote_status.progress is not none %} · {{ job.remote_status.progress }}%{% endif %}</p>{% endif %}<form method="post" action="{{ url_for('refresh_remote_status', job_id=job.job_id) }}"><button type="submit">Check Remote Status (Read-only)</button></form></article>
+        <article class="card wide"><h3>Production Controls · Sovol SV07</h3><div class="grid"><div class="stage"><strong>1. Preview</strong>Complete</div><div class="stage"><strong>2. Production Approval</strong>{% if job.status == 'production_approved' or job.status == 'sliced' %}Recorded{% else %}Required{% endif %}</div><div class="stage"><strong>3. Offline Slice</strong>{% if job.status == 'sliced' %}Complete{% else %}Not requested{% endif %}</div><div class="stage"><strong>4. Remote Observation</strong>{% if job.remote_status %}{% if job.remote_status.connected %}Read-only check completed {{ job.remote_status.checked_at }}{% else %}{{ job.remote_status.message }}{% endif %}{% else %}Not checked{% endif %}</div></div><p class="muted">Slicer, printer, and remote options remain separate. Previewing cannot trigger them.</p>{% if job.status == 'preview_ready' %}<form method="post" action="{{ url_for('approve_production', job_id=job.job_id) }}"><label><input name="braille_and_tactile_reviewed" type="checkbox" value="yes" required>I reviewed the Braille and source-derived tactile design for this job.</label><label for="confirm-job">Type the saved job ID to approve this production package</label><input id="confirm-job" name="confirm_job_id" autocomplete="off" required><button type="submit">Record Production Approval</button></form>{% elif job.status == 'production_approved' %}<form method="post" action="{{ url_for('slice_job', job_id=job.job_id) }}"><p class="muted">This runs the pinned OrcaSlicer profile locally. It does not upload or start a print.</p><button type="submit">Slice Locally for SV07</button></form>{% elif job.status == 'sliced' %}<p class="muted">Offline package created. It has not been uploaded or started.</p><ul class="links">{% for name in job.production.artifacts %}<li><a href="{{ url_for('production_artifact', job_id=job.job_id, name=name) }}">{{ name }}</a></li>{% endfor %}</ul>{% endif %}{% if job.remote_status and job.remote_status.connected %}<p class="muted">Klipper: {{ job.remote_status.klipper_state }} · Print: {{ job.remote_status.print_state }}{% if job.remote_status.filename %} · {{ job.remote_status.filename }}{% endif %}{% if job.remote_status.progress is not none %} · {{ job.remote_status.progress }}%{% endif %}</p>{% endif %}<form method="post" action="{{ url_for('refresh_remote_status', job_id=job.job_id) }}"><button type="submit">Check Remote Status (Read-only)</button></form></article>
         <article class="card wide"><h3>Saved Artifacts</h3><ul class="links">{% for name in job.artifacts %}<li><a href="{{ url_for('artifact', job_id=job.job_id, name=name) }}">{{ name }}</a></li>{% endfor %}</ul></article>
       </div>
     {% else %}
@@ -126,6 +137,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         MOONRAKER_API_KEY=os.environ.get("MOONRAKER_API_KEY"),
         MOONRAKER_BEARER_TOKEN=os.environ.get("MOONRAKER_BEARER_TOKEN"),
         MOONRAKER_TIMEOUT_SECONDS=5.0,
+        SLICER_ROOT=os.environ.get("ORCA_SLICER_ROOT"),
     )
     if test_config:
         app.config.update(test_config)
@@ -171,6 +183,9 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
                     "safety": manifest["printer_interaction"],
                     "braille_review": manifest["human_review"]["braille"],
                     "remote_status": None,
+                    "production_approval": None,
+                    "production": None,
+                    "action_message": None,
                 },
             )
         except (OSError, ValueError) as exc:
@@ -192,6 +207,61 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         if name not in job["artifacts"]:
             abort(404)
         return send_from_directory(_job_path(Path(app.config["JOBS_ROOT"]), job_id) / "artifacts", name)
+
+    @app.post("/jobs/<job_id>/production-approval")
+    def approve_production(job_id: str):
+        root = Path(app.config["JOBS_ROOT"])
+        job = _load_job(root, job_id)
+        if job.get("status") != "preview_ready":
+            abort(409)
+        if request.form.get("braille_and_tactile_reviewed") != "yes" or request.form.get("confirm_job_id") != job_id:
+            job["action_message"] = "Production approval was not recorded. Review the artifacts and enter this job ID exactly."
+        else:
+            job["status"] = "production_approved"
+            job["production_approval"] = {"approved_at": _utc_now(), "job_id_confirmation": job_id}
+            job["action_message"] = "Production approval recorded. Local slicing is now available."
+        _write_job(_job_path(root, job_id), job)
+        return redirect(url_for("show_job", job_id=job_id))
+
+    @app.post("/jobs/<job_id>/slice")
+    def slice_job(job_id: str):
+        root = Path(app.config["JOBS_ROOT"])
+        job_dir = _job_path(root, job_id)
+        job = _load_job(root, job_id)
+        if job.get("status") != "production_approved":
+            abort(409)
+        production_dir = job_dir / "production"
+        if production_dir.exists():
+            job["action_message"] = "A production package already exists for this job. Create a new preview to revise it."
+            _write_job(job_dir, job)
+            return redirect(url_for("show_job", job_id=job_id))
+        try:
+            slicer_root = Path(app.config["SLICER_ROOT"]) if app.config["SLICER_ROOT"] else None
+            generate_package(
+                job_dir / job["input"]["filename"], job_dir / "card.json", production_dir,
+                slicer_root=slicer_root,
+            )
+            manifest = json.loads((production_dir / "manifest.json").read_text(encoding="utf-8"))
+            artifacts = sorted(name for name in PRODUCTION_ARTIFACT_NAMES if (production_dir / name).is_file())
+            job["status"] = "sliced"
+            job["production"] = {
+                "sliced_at": _utc_now(),
+                "artifacts": artifacts,
+                "safety": manifest["printer_interaction"],
+            }
+            job["action_message"] = "Offline SV07 slice completed. No upload or print start occurred."
+        except Exception:
+            shutil.rmtree(production_dir, ignore_errors=True)
+            job["action_message"] = "Offline slicing failed. Review the local slicer setup and retry this approved job."
+        _write_job(job_dir, job)
+        return redirect(url_for("show_job", job_id=job_id))
+
+    @app.get("/jobs/<job_id>/production/<name>")
+    def production_artifact(job_id: str, name: str):
+        job = _load_job(Path(app.config["JOBS_ROOT"]), job_id)
+        if name not in job.get("production", {}).get("artifacts", []):
+            abort(404)
+        return send_from_directory(_job_path(Path(app.config["JOBS_ROOT"]), job_id) / "production", name)
 
     @app.post("/jobs/<job_id>/remote-status")
     def refresh_remote_status(job_id: str):

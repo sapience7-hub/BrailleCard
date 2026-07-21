@@ -21,8 +21,8 @@ def test_home_shows_local_preview_form(client) -> None:
 
     assert response.status_code == 200
     assert b"Create a Tactile Card Preview" in response.data
-    assert b"Preview only" in response.data
-    assert b"No printer contacted" in response.data
+    assert b"Safety boundary" in response.data
+    assert b"never uploads or starts a printer job" in response.data
 
 
 def test_preview_job_persists_generated_artifacts(client, tmp_path: Path, monkeypatch) -> None:
@@ -53,10 +53,11 @@ def test_preview_job_persists_generated_artifacts(client, tmp_path: Path, monkey
 
     assert response.status_code == 200
     assert b"Preview Ready" in response.data
-    assert b"not yet human-reviewed" in response.data
     job_files = list((tmp_path / "jobs").glob("*/job.json"))
     assert len(job_files) == 1
-    assert '"status": "preview_ready"' in job_files[0].read_text(encoding="utf-8")
+    stored = job_files[0].read_text(encoding="utf-8")
+    assert '"status": "preview_ready"' in stored
+    assert '"braille_review": "not yet human-reviewed"' in stored
 
 
 def test_validation_error_does_not_create_job(client, tmp_path: Path) -> None:
@@ -117,6 +118,71 @@ def test_remote_status_does_not_connect_without_local_configuration(client, tmp_
 
     assert response.status_code == 200
     assert b"not configured" in response.data
+
+
+def test_production_approval_requires_checkbox_and_exact_job_id(client, tmp_path: Path) -> None:
+    job_id = "a" * 36
+    job_dir = tmp_path / "jobs" / job_id
+    job_dir.mkdir(parents=True)
+    (job_dir / "job.json").write_text(
+        '{"job_id":"' + job_id + '","artifacts":[],"status":"preview_ready","remote_status":null}',
+        encoding="utf-8",
+    )
+
+    rejected = client.post(
+        f"/jobs/{job_id}/production-approval",
+        data={"braille_and_tactile_reviewed": "yes", "confirm_job_id": "wrong"},
+        follow_redirects=True,
+    )
+    assert b"was not recorded" in rejected.data
+    assert '"status": "preview_ready"' in (job_dir / "job.json").read_text(encoding="utf-8")
+
+    approved = client.post(
+        f"/jobs/{job_id}/production-approval",
+        data={"braille_and_tactile_reviewed": "yes", "confirm_job_id": job_id},
+        follow_redirects=True,
+    )
+    assert b"Local slicing is now available" in approved.data
+    assert '"status": "production_approved"' in (job_dir / "job.json").read_text(encoding="utf-8")
+
+
+def test_offline_slice_requires_approval_and_never_contacts_printer(client, tmp_path: Path, monkeypatch) -> None:
+    from braille_card import web
+
+    job_id = "b" * 36
+    job_dir = tmp_path / "jobs" / job_id
+    job_dir.mkdir(parents=True)
+    (job_dir / "card.png").write_bytes(b"image")
+    (job_dir / "card.json").write_text('{"greeting":"Hi","message":"Hello"}', encoding="utf-8")
+    (job_dir / "job.json").write_text(
+        '{"job_id":"' + job_id + '","artifacts":[],"status":"preview_ready","input":{"filename":"card.png"},"remote_status":null}',
+        encoding="utf-8",
+    )
+
+    def fake_generate_package(image: Path, card: Path, output: Path, *, slicer_root) -> Path:
+        assert image == job_dir / "card.png"
+        assert card == job_dir / "card.json"
+        assert slicer_root is None
+        output.mkdir()
+        (output / "card.gcode").write_text("; local gcode", encoding="utf-8")
+        (output / "manifest.json").write_text(
+            '{"printer_interaction":{"gcode_generated_offline":true,"submitted_to_printer":false,"print_started":false}}',
+            encoding="utf-8",
+        )
+        return output
+
+    monkeypatch.setattr(web, "generate_package", fake_generate_package)
+    assert client.post(f"/jobs/{job_id}/slice").status_code == 409
+
+    client.post(
+        f"/jobs/{job_id}/production-approval",
+        data={"braille_and_tactile_reviewed": "yes", "confirm_job_id": job_id},
+    )
+    response = client.post(f"/jobs/{job_id}/slice", follow_redirects=True)
+    assert b"Offline SV07 slice completed" in response.data
+    stored = (job_dir / "job.json").read_text(encoding="utf-8")
+    assert '"status": "sliced"' in stored
+    assert '"submitted_to_printer": false' in stored
 
 
 def test_cli_exposes_local_web_server_help() -> None:
