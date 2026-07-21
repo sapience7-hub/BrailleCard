@@ -71,6 +71,54 @@ def test_validation_error_does_not_create_job(client, tmp_path: Path) -> None:
     assert not (tmp_path / "jobs").exists()
 
 
+def test_remote_status_is_an_explicit_read_only_action(client, tmp_path: Path, monkeypatch) -> None:
+    from braille_card import web
+
+    job_id = "f" * 36
+    job_dir = tmp_path / "jobs" / job_id
+    job_dir.mkdir(parents=True)
+    (job_dir / "job.json").write_text(
+        '{"job_id":"' + job_id + '","artifacts":[],"remote_status":null}', encoding="utf-8"
+    )
+
+    class FakeMoonraker:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def read_status(self):
+            return {
+                "webhooks": {"state": "ready"},
+                "print_stats": {"state": "standby", "filename": ""},
+                "virtual_sdcard": {"progress": 0},
+            }
+
+    monkeypatch.setattr(web, "MoonrakerClient", FakeMoonraker)
+    app = client.application
+    app.config["MOONRAKER_URL"] = "http://printer.local"
+
+    response = client.post(f"/jobs/{job_id}/remote-status", follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b"Klipper: ready" in response.data
+    assert b"Print: standby" in response.data
+    stored = (job_dir / "job.json").read_text(encoding="utf-8")
+    assert '"connected": true' in stored
+
+
+def test_remote_status_does_not_connect_without_local_configuration(client, tmp_path: Path) -> None:
+    job_id = "e" * 36
+    job_dir = tmp_path / "jobs" / job_id
+    job_dir.mkdir(parents=True)
+    (job_dir / "job.json").write_text(
+        '{"job_id":"' + job_id + '","artifacts":[],"remote_status":null}', encoding="utf-8"
+    )
+
+    response = client.post(f"/jobs/{job_id}/remote-status", follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b"not configured" in response.data
+
+
 def test_cli_exposes_local_web_server_help() -> None:
     repository = Path(__file__).resolve().parents[1]
     result = subprocess.run(

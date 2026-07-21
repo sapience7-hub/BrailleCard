@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import uuid
 from datetime import UTC, datetime
@@ -13,6 +14,7 @@ from flask import Flask, abort, redirect, render_template_string, request, send_
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
+from .moonraker import MoonrakerClient, MoonrakerError
 from .preview import generate_preview
 
 ARTIFACT_NAMES = {
@@ -52,7 +54,7 @@ PAGE = """<!doctype html>
         <article class="card wide"><h3>Visual Layout</h3><img class="art" width="1064" height="711" fetchpriority="high" src="{{ url_for('artifact', job_id=job.job_id, name='visual_preview.png') }}" alt="Front and back visual card preview"></article>
         <article class="card"><h3>Tactile Preview</h3><img class="art" width="635" height="889" loading="lazy" src="{{ url_for('artifact', job_id=job.job_id, name='tactile_preview.png') }}" alt="Tactile interpretation preview"></article>
         <article class="card"><h3>Braille Review</h3><p>Review source text, Unicode Braille, and BRF before any print approval.</p><p><a href="{{ url_for('artifact', job_id=job.job_id, name='braille_review.html') }}">Open side-by-side Braille review</a></p></article>
-        <article class="card wide"><h3>Production Controls</h3><div class="grid"><div class="stage"><strong>1. Preview</strong>Complete</div><div class="stage"><strong>2. Offline Slice</strong>Not requested</div><div class="stage"><strong>3. Operator Print Approval</strong>Required before upload or start</div><div class="stage"><strong>4. Remote Observation</strong>Read-only and not connected</div></div><p class="muted">Slicer, printer, and remote options will remain separate actions. A preview cannot trigger them.</p></article>
+        <article class="card wide"><h3>Production Controls · Sovol SV07</h3><div class="grid"><div class="stage"><strong>1. Preview</strong>Complete</div><div class="stage"><strong>2. Offline Slice</strong>Blocked until source-derived tactile production geometry is available</div><div class="stage"><strong>3. Operator Print Approval</strong>Unavailable until a reviewed, sliced job exists</div><div class="stage"><strong>4. Remote Observation</strong>{% if job.remote_status %}{% if job.remote_status.connected %}Read-only check completed {{ job.remote_status.checked_at }}{% else %}{{ job.remote_status.message }}{% endif %}{% else %}Not checked{% endif %}</div></div><p class="muted">Slicer, printer, and remote options remain separate. Previewing cannot trigger them.</p>{% if job.remote_status and job.remote_status.connected %}<p class="muted">Klipper: {{ job.remote_status.klipper_state }} · Print: {{ job.remote_status.print_state }}{% if job.remote_status.filename %} · {{ job.remote_status.filename }}{% endif %}{% if job.remote_status.progress is not none %} · {{ job.remote_status.progress }}%{% endif %}</p>{% endif %}<form method="post" action="{{ url_for('refresh_remote_status', job_id=job.job_id) }}"><button type="submit">Check Remote Status (Read-only)</button></form></article>
         <article class="card wide"><h3>Saved Artifacts</h3><ul class="links">{% for name in job.artifacts %}<li><a href="{{ url_for('artifact', job_id=job.job_id, name=name) }}">{{ name }}</a></li>{% endfor %}</ul></article>
       </div>
     {% else %}
@@ -91,6 +93,22 @@ def _write_job(path: Path, payload: dict[str, Any]) -> None:
     )
 
 
+def _remote_status_summary(status: dict[str, Any]) -> dict[str, Any]:
+    """Keep only small, operator-useful fields in the local job record."""
+    webhooks = status.get("webhooks", {})
+    print_stats = status.get("print_stats", {})
+    virtual_sdcard = status.get("virtual_sdcard", {})
+    progress = virtual_sdcard.get("progress")
+    return {
+        "connected": True,
+        "checked_at": _utc_now(),
+        "klipper_state": str(webhooks.get("state", "unknown")),
+        "print_state": str(print_stats.get("state", "unknown")),
+        "filename": str(print_stats.get("filename", "")),
+        "progress": round(float(progress) * 100, 1) if isinstance(progress, (int, float)) else None,
+    }
+
+
 def _save_upload(upload: FileStorage, path: Path) -> str:
     filename = secure_filename(upload.filename or "")
     if not filename:
@@ -104,6 +122,10 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     app.config.from_mapping(
         JOBS_ROOT=Path.cwd() / ".braillecard-jobs",
         MAX_CONTENT_LENGTH=15 * 1024 * 1024,
+        MOONRAKER_URL=os.environ.get("MOONRAKER_URL"),
+        MOONRAKER_API_KEY=os.environ.get("MOONRAKER_API_KEY"),
+        MOONRAKER_BEARER_TOKEN=os.environ.get("MOONRAKER_BEARER_TOKEN"),
+        MOONRAKER_TIMEOUT_SECONDS=5.0,
     )
     if test_config:
         app.config.update(test_config)
@@ -148,6 +170,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
                     "artifacts": available,
                     "safety": manifest["printer_interaction"],
                     "braille_review": manifest["human_review"]["braille"],
+                    "remote_status": None,
                 },
             )
         except (OSError, ValueError) as exc:
@@ -169,5 +192,31 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         if name not in job["artifacts"]:
             abort(404)
         return send_from_directory(_job_path(Path(app.config["JOBS_ROOT"]), job_id) / "artifacts", name)
+
+    @app.post("/jobs/<job_id>/remote-status")
+    def refresh_remote_status(job_id: str):
+        root = Path(app.config["JOBS_ROOT"])
+        job = _load_job(root, job_id)
+        if not app.config["MOONRAKER_URL"]:
+            job["remote_status"] = {
+                "connected": False,
+                "message": "Remote status is not configured on this computer.",
+            }
+        else:
+            try:
+                client = MoonrakerClient(
+                    str(app.config["MOONRAKER_URL"]),
+                    api_key=app.config["MOONRAKER_API_KEY"],
+                    bearer_token=app.config["MOONRAKER_BEARER_TOKEN"],
+                    timeout_seconds=float(app.config["MOONRAKER_TIMEOUT_SECONDS"]),
+                )
+                job["remote_status"] = _remote_status_summary(client.read_status())
+            except (MoonrakerError, ValueError):
+                job["remote_status"] = {
+                    "connected": False,
+                    "message": "Remote status could not be read. Check local Moonraker settings.",
+                }
+        _write_job(_job_path(root, job_id), job)
+        return redirect(url_for("show_job", job_id=job_id))
 
     return app

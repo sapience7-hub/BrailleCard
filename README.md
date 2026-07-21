@@ -46,6 +46,21 @@ The workspace binds to `127.0.0.1:8765` by default. It saves preview jobs
 locally and keeps visual/Braille/tactile review separate from slicing, printer
 approval, and remote observation.
 
+To enable its **read-only** Sovol SV07 status check, configure Moonraker only
+in the shell that starts the local studio. Do not put credentials in a job file
+or browser form:
+
+~~~sh
+export MOONRAKER_URL="http://printer.local"
+export MOONRAKER_API_KEY="your-local-moonraker-api-key"
+PYTHONPATH=src python3 -m braille_card --serve
+~~~
+
+`MOONRAKER_BEARER_TOKEN` is supported instead of `MOONRAKER_API_KEY`. The
+current browser integration queries status only after an operator clicks its
+button; it cannot upload G-code, start a print, run G-code, or alter printer
+state.
+
 The destination must be absent or empty so stale files cannot leak into a
 manifest. Run all gates with `pytest -q`. The generated G-code remains a file;
 printing, Braille review, tactile testing, and operator quality control are
