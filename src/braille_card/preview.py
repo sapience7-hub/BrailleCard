@@ -10,7 +10,7 @@ from .documents import (
     create_visual_preview,
     write_braille_artifacts,
 )
-from .geometry import write_tactile_preview, write_tactile_svg
+from .geometry import write_source_tactile_preview, write_source_tactile_svg
 from .images import normalize_image, validate_preview_image
 
 MAX_GREETING_CHARACTERS = 30
@@ -106,7 +106,7 @@ def generate_preview(image_path: Path, card_config_path: Path, output_dir: Path)
         back_lines,
         output_dir / "visual_preview.png",
     )
-    write_tactile_preview(output_dir / "tactile_preview.png")
-    write_tactile_svg(output_dir / "tactile_layer.svg")
+    write_source_tactile_preview(normalized, output_dir / "tactile_preview.png")
+    write_source_tactile_svg(normalized, output_dir / "tactile_layer.svg")
     _write_manifest(output_dir, image_path, greeting, message)
     return output_dir

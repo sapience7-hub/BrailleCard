@@ -422,6 +422,7 @@ def write_3mf(mesh: Mesh, output: Path) -> None:
 
 
 def write_tactile_svg(output: Path) -> None:
+    """Write the legacy reference-heart tactile layer for production packages."""
     ellipses = "\n".join(
         f'  <ellipse cx="{cx:.3f}" cy="{spec.CARD_HEIGHT - cy:.3f}" rx="{radius_x:.3f}" ry="{radius_y:.3f}"/>'
         for cx, cy, radius_x, radius_y in HEART_SHAPES
@@ -436,6 +437,7 @@ def write_tactile_svg(output: Path) -> None:
 
 
 def write_tactile_preview(output: Path) -> None:
+    """Write the legacy reference-heart tactile preview for production packages."""
     scale = 5
     image = Image.new("RGB", (round(spec.CARD_WIDTH * scale), round(spec.CARD_HEIGHT * scale)), "#f5f0e6")
     draw = ImageDraw.Draw(image)
@@ -448,6 +450,63 @@ def write_tactile_preview(output: Path) -> None:
     font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 16)
     draw.rectangle((0, 0, image.width, 38), fill="#f5f0e6")
     draw.text((12, 12), "TACTILE SILHOUETTE — 0.8 mm RAISED, BEVELLED EDGE", fill="#222222", font=font)
+    image.save(output, format="PNG", optimize=False)
+
+
+def _source_tactile_cells(normalized_image: Path, columns: int = 38) -> list[tuple[int, int]]:
+    """Reduce normalized artwork to a stable, reviewable tactile-cell grid."""
+    with Image.open(normalized_image) as image:
+        reduced = image.convert("L").resize((columns, columns), Image.Resampling.BOX)
+        return [
+            (column, row)
+            for row in range(columns)
+            for column in range(columns)
+            if reduced.getpixel((column, row)) < 220
+        ]
+
+
+def write_source_tactile_svg(normalized_image: Path, output: Path) -> None:
+    """Write an artwork-derived tactile layer for review, never production geometry."""
+    columns = 38
+    left, bottom, right, top = spec.FRONT_ART_REGION
+    cell_width = (right - left) / columns
+    cell_height = (top - bottom) / columns
+    cells = "\n".join(
+        f'  <rect x="{left + column * cell_width:.3f}" '
+        f'y="{spec.CARD_HEIGHT - top + row * cell_height:.3f}" '
+        f'width="{cell_width:.3f}" height="{cell_height:.3f}"/>'
+        for column, row in _source_tactile_cells(normalized_image, columns)
+    )
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{spec.CARD_WIDTH}mm" height="{spec.CARD_HEIGHT}mm" viewBox="0 0 {spec.CARD_WIDTH} {spec.CARD_HEIGHT}">
+<title>Source-derived tactile preview; not production geometry</title>
+<g fill="#111111" stroke="none">
+{cells}
+</g></svg>
+'''
+    output.write_text(svg, encoding="utf-8", newline="\n")
+
+
+def write_source_tactile_preview(normalized_image: Path, output: Path) -> None:
+    """Write a source-derived tactile visualization for human review only."""
+    columns = 38
+    scale = 5
+    image = Image.new("RGB", (round(spec.CARD_WIDTH * scale), round(spec.CARD_HEIGHT * scale)), "#f5f0e6")
+    draw = ImageDraw.Draw(image)
+    left, bottom, right, top = spec.FRONT_ART_REGION
+    cell_width = (right - left) * scale / columns
+    cell_height = (top - bottom) * scale / columns
+    for column, row in _source_tactile_cells(normalized_image, columns):
+        x = left * scale + column * cell_width
+        y = (spec.CARD_HEIGHT - top) * scale + row * cell_height
+        draw.rectangle((x, y, x + cell_width, y + cell_height), fill="#b04a5a")
+    draw.rectangle(
+        (left * scale, (spec.CARD_HEIGHT - top) * scale, right * scale, (spec.CARD_HEIGHT - bottom) * scale),
+        outline="#6e7d73",
+        width=1,
+    )
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
+    draw.rectangle((0, 0, image.width, 38), fill="#f5f0e6")
+    draw.text((12, 12), "SOURCE-DERIVED TACTILE PREVIEW — NOT PRINT GEOMETRY", fill="#222222", font=font)
     image.save(output, format="PNG", optimize=False)
 
 

@@ -75,6 +75,25 @@ def test_preview_output_is_byte_identical(tmp_path: Path) -> None:
     }
 
 
+def test_tactile_preview_tracks_uploaded_artwork(tmp_path: Path) -> None:
+    white = tmp_path / "white.png"
+    black = tmp_path / "black.png"
+    Image.new("RGB", (600, 600), "white").save(white)
+    Image.new("RGB", (600, 600), "black").save(black)
+
+    white_preview = generate_preview(white, _card(tmp_path / "white.json"), tmp_path / "white-preview")
+    black_preview = generate_preview(black, _card(tmp_path / "black.json"), tmp_path / "black-preview")
+
+    white_svg = (white_preview / "tactile_layer.svg").read_text(encoding="utf-8")
+    black_svg = (black_preview / "tactile_layer.svg").read_text(encoding="utf-8")
+    assert "not production geometry" in white_svg
+    assert white_svg.count("<rect") == 0
+    assert black_svg.count("<rect") > 1
+    assert (white_preview / "tactile_preview.png").read_bytes() != (
+        black_preview / "tactile_preview.png"
+    ).read_bytes()
+
+
 def test_preview_enforces_raster_and_text_limits(tmp_path: Path) -> None:
     image = Image.new("RGB", (600, 600), "white")
     valid = tmp_path / "valid.png"
