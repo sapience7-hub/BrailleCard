@@ -36,6 +36,16 @@ previews, plus uncontracted UEB review artifacts. It does not generate
 production geometry or G-code, invoke OrcaSlicer, start a browser, or contact
 a printer.
 
+Run the local browser workspace:
+
+~~~sh
+PYTHONPATH=src python3 -m braille_card --serve
+~~~
+
+The workspace binds to `127.0.0.1:8765` by default. It saves preview jobs
+locally and keeps visual/Braille/tactile review separate from slicing, printer
+approval, and remote observation.
+
 The destination must be absent or empty so stale files cannot leak into a
 manifest. Run all gates with `pytest -q`. The generated G-code remains a file;
 printing, Braille review, tactile testing, and operator quality control are
