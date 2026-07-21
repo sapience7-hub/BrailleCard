@@ -1,0 +1,26 @@
+{
+  "faces": {
+    "back": {
+      "brf": ",you make every day bright4",
+      "source": "You make every day bright.",
+      "unicode": "⠠⠽⠕⠥⠀⠍⠁⠅⠑⠀⠑⠧⠑⠗⠽⠀⠙⠁⠽⠀⠃⠗⠊⠛⠓⠞⠲",
+      "wrapped_unicode": [
+        "⠠⠽⠕⠥⠀⠍⠁⠅⠑",
+        "⠑⠧⠑⠗⠽⠀⠙⠁⠽",
+        "⠃⠗⠊⠛⠓⠞⠲"
+      ]
+    },
+    "front": {
+      "brf": ",with love",
+      "source": "With love",
+      "unicode": "⠠⠺⠊⠞⠓⠀⠇⠕⠧⠑",
+      "wrapped_unicode": [
+        "⠠⠺⠊⠞⠓",
+        "⠇⠕⠧⠑"
+      ]
+    }
+  },
+  "grade": "UEB Grade 1 (uncontracted)",
+  "liblouis_table": "en-ueb-g1.ctb",
+  "review_status": "not yet human-reviewed"
+}

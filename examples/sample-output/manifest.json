@@ -1,0 +1,759 @@
+{
+  "automated_checks": {
+    "braille_artwork_collision": {
+      "art_bounds_mm": [
+        21.04736842105263,
+        55.94736842105264,
+        55.15263157894736,
+        86.63157894736842
+      ],
+      "front_braille_region_mm": [
+        9.0,
+        13.0,
+        67.2,
+        28.0
+      ],
+      "passed": true
+    },
+    "braille_dimensional_baseline": {
+      "passed": true,
+      "required_ranges_mm": {
+        "cell_to_cell_spacing_mm": [
+          6.1,
+          7.6
+        ],
+        "dot_base_diameter_mm": [
+          1.5,
+          1.6
+        ],
+        "dot_height_mm": [
+          0.6,
+          0.9
+        ],
+        "line_to_line_spacing_mm": [
+          10.0,
+          10.2
+        ],
+        "within_cell_spacing_mm": [
+          2.3,
+          2.5
+        ]
+      },
+      "values_mm": {
+        "cell_to_cell_spacing_mm": 6.4,
+        "dot_base_diameter_mm": 1.55,
+        "dot_height_mm": 0.75,
+        "line_to_line_spacing_mm": 10.1,
+        "within_cell_spacing_mm": 2.4
+      }
+    },
+    "exports_generated": {
+      "missing_or_empty": [],
+      "passed": true
+    },
+    "minimum_feature_size": {
+      "minimum_actual_mm": 0.9,
+      "minimum_required_mm": 0.8,
+      "passed": true
+    },
+    "no_isolated_tactile_fragments": {
+      "component_count": 358,
+      "connection_rule": "isolated four-neighbour cells removed; each retained cell overlaps the base panel",
+      "passed": true
+    },
+    "no_unsafe_sharp_peaks": {
+      "geometry": "flat plateaus with 0.4 mm straight bevel; no point apex",
+      "maximum_bevel_slope_degrees": 45.0,
+      "passed": true
+    },
+    "panel_thickness": {
+      "actual_mm": 2.0,
+      "allowed_mm": [
+        1.8,
+        2.2
+      ],
+      "passed": true
+    },
+    "safe_margins": {
+      "art_bounds_mm": [
+        21.04736842105263,
+        55.94736842105264,
+        55.15263157894736,
+        86.63157894736842
+      ],
+      "passed": true,
+      "safe_margin_mm": 6.35
+    },
+    "sv07_build_area_fit": {
+      "passed": true,
+      "stock_build_volume_xyz_mm": [
+        220.0,
+        220.0,
+        250.0
+      ],
+      "upright_footprint_with_5mm_brim_xyz_mm": [
+        86.2,
+        13.55,
+        101.6
+      ]
+    },
+    "uploaded_file_readable": {
+      "error": "",
+      "passed": true,
+      "retained_original_count": 1
+    }
+  },
+  "braille": {
+    "cell_to_cell_spacing_mm": 6.4,
+    "code": "Unified English Braille",
+    "dot_base_diameter_mm": 1.55,
+    "dot_height_mm": 0.75,
+    "dot_shape": "spherical cap",
+    "grade": "Grade 1 (uncontracted)",
+    "line_to_line_spacing_mm": 10.1,
+    "review_status": "not yet human-reviewed",
+    "table": "en-ueb-g1.ctb",
+    "translation_engine": "liblouis 3.29.0",
+    "within_cell_spacing_mm": 2.4
+  },
+  "card": {
+    "base_panel_thickness_mm": 2.0,
+    "construction": "flat single rigid panel",
+    "envelope_target": "small portrait card envelope",
+    "finished_height_mm": 101.6,
+    "finished_width_mm": 76.2,
+    "material": "PLA",
+    "orientation": "portrait design; upright long-edge production model",
+    "safe_margin_mm": 6.35
+  },
+  "claim": "production package generated and machine-checked",
+  "deterministic_normalization": {
+    "3mf": "sorted deterministic XML; fixed ZIP entry mtime 1980-01-01 and permissions 0644",
+    "gcode": "OrcaSlicer pinned at 2.4.2; generated-on wall-clock comment replaced with fixed text; executable commands unchanged",
+    "generated_content_excludes": [
+      "randomness",
+      "hostnames",
+      "absolute paths",
+      "wall-clock timestamps"
+    ],
+    "image": "fixed 1200x1200 bilevel PNG; metadata omitted",
+    "manifest_self_checksum": "omitted to avoid a recursive checksum; all other package files are listed",
+    "pdf": "ReportLab invariant mode with page compression",
+    "stl": "fixed 80-byte header; little-endian binary triangles"
+  },
+  "files": {
+    "PRINTING_AND_FINISHING.md": {
+      "bytes": 1757,
+      "sha256": "87242fc8ba5414061258ca325d4f74da52525b5619a29e44593577073617bf30"
+    },
+    "QUALITY_CONTROL.md": {
+      "bytes": 2100,
+      "sha256": "d68d27c2bc7d40f20cc8bc132a3fbbf2e7f7969f0485be0609ed8636e103cb70"
+    },
+    "braille.json": {
+      "bytes": 715,
+      "sha256": "61786a47e31810ab2d93e98320fe09b18bb54736fc64e51b1e0a40602c879ffe"
+    },
+    "braille_review.html": {
+      "bytes": 1254,
+      "sha256": "1cf165a71c589f972d193bc389736d9f4ada47fa5a2087dd3e219d2b5898b553"
+    },
+    "braille_source.txt": {
+      "bytes": 67,
+      "sha256": "ab4f5879e6c8c07afa96afdc407146b7cbc2b0bae8c1d5fb925e2e3bc66c2b74"
+    },
+    "braille_ueb.brf": {
+      "bytes": 52,
+      "sha256": "67f4860b50f39a406dda110e8dd915a7e6260ab11514e54967903a7650754b20"
+    },
+    "braille_ueb_unicode.txt": {
+      "bytes": 126,
+      "sha256": "b8a977af5886e1ab38981e7c986cc5950c66884194f913b3e2d87c1c336f7512"
+    },
+    "card.gcode": {
+      "bytes": 2454268,
+      "sha256": "995f9da9b8caaf992c13a9514eb8798990ff2b0db0ba038510b69ec370ade6c8"
+    },
+    "checks.json": {
+      "bytes": 2109,
+      "sha256": "c3539d315ca38e0736871f0a33a0dcef3f4b4119aff4723aa2ae65de5df8c97f"
+    },
+    "combined_card.3mf": {
+      "bytes": 660927,
+      "sha256": "1595ed69cbd053e751b3e42c833dd6004175ea7b451c03f7414a11658810b762"
+    },
+    "combined_card.stl": {
+      "bytes": 3547084,
+      "sha256": "26d46178489d3c0c7d78134f84fa76c8ea87a82239247a38586d80fe3bc90356"
+    },
+    "geometry.json": {
+      "bytes": 6200,
+      "sha256": "6196cf3ea681602ab4f51f388d05d3791678e83487146a6853e626c0378d60f6"
+    },
+    "layout.pdf": {
+      "bytes": 18553,
+      "sha256": "46eca8cc8b42cbb7b84faf4458637da1c36a313df9269f7ac838b3979e947ac2"
+    },
+    "normalized_production.png": {
+      "bytes": 4919,
+      "sha256": "469d6fde52cf968836629264ee0a64ab4f151a4613b0dc916125caefb4411060"
+    },
+    "original_input.svg": {
+      "bytes": 289,
+      "sha256": "74c572a5d5a7de44a58904ab1c1b0f60696e852a1383044ecfd0db3dd01c1207"
+    },
+    "tactile_layer.svg": {
+      "bytes": 22051,
+      "sha256": "7208875c95c1144c85629adba313e3789aeb4745ca5c55bf08f75a25de63adea"
+    },
+    "tactile_preview.png": {
+      "bytes": 5261,
+      "sha256": "6ecfa159e3770ef797faee79af71811aff409eb868acaecb2e4cf565f62605e7"
+    },
+    "visual_preview.png": {
+      "bytes": 12087,
+      "sha256": "a5699d4ffed078585d9aaf2c19bd04df08fda957919432b49855f6da3d2250d9"
+    }
+  },
+  "gcode": {
+    "filament_profile": "Sovol SV07 PLA",
+    "gcode_sha256": "995f9da9b8caaf992c13a9514eb8798990ff2b0db0ba038510b69ec370ade6c8",
+    "initial_bed_temperature_c": 65,
+    "initial_nozzle_temperature_c": 235,
+    "layer_count": 507,
+    "machine_profile": "Sovol SV07 0.4 nozzle",
+    "normal_nozzle_temperature_c": 200,
+    "process_profile": "0.20mm Standard @Sovol SV07",
+    "slicer": "OrcaSlicer 2.4.2",
+    "stock_profile_sha256": {
+      "filament": "98de4434a4aa6afeda112b3ee621866c57f24ae7a1d7c20b4307a9e541fe5d35",
+      "machine": "5433a5ab8ff3e31deba7228185c2aca1bc9c97e42a6c8ed1e390df58f8a0eccd",
+      "process": "ffc026a9c0db3985928c2291aa9a95bd2fac3e5324c3c6b3deaa45f5f4d07dd2"
+    },
+    "submitted_to_printer": false,
+    "supports_enabled": true,
+    "validated": true
+  },
+  "geometry": {
+    "braille": {
+      "back_dot_count": 68,
+      "back_layout_dot_centres_mm": [
+        [
+          11.4,
+          55.2
+        ],
+        [
+          15.4,
+          60.0
+        ],
+        [
+          15.4,
+          55.2
+        ],
+        [
+          17.8,
+          60.0
+        ],
+        [
+          17.8,
+          57.6
+        ],
+        [
+          17.8,
+          55.2
+        ],
+        [
+          21.8,
+          60.0
+        ],
+        [
+          21.8,
+          55.2
+        ],
+        [
+          24.2,
+          57.6
+        ],
+        [
+          28.200000000000003,
+          60.0
+        ],
+        [
+          28.200000000000003,
+          55.2
+        ],
+        [
+          30.6,
+          55.2
+        ],
+        [
+          41.0,
+          60.0
+        ],
+        [
+          41.0,
+          55.2
+        ],
+        [
+          43.4,
+          60.0
+        ],
+        [
+          47.400000000000006,
+          60.0
+        ],
+        [
+          53.800000000000004,
+          60.0
+        ],
+        [
+          53.800000000000004,
+          55.2
+        ],
+        [
+          60.2,
+          60.0
+        ],
+        [
+          62.6,
+          57.6
+        ],
+        [
+          9.0,
+          49.9
+        ],
+        [
+          11.4,
+          47.5
+        ],
+        [
+          15.4,
+          49.9
+        ],
+        [
+          15.4,
+          47.5
+        ],
+        [
+          15.4,
+          45.1
+        ],
+        [
+          17.8,
+          45.1
+        ],
+        [
+          21.8,
+          49.9
+        ],
+        [
+          24.2,
+          47.5
+        ],
+        [
+          28.200000000000003,
+          49.9
+        ],
+        [
+          28.200000000000003,
+          47.5
+        ],
+        [
+          28.200000000000003,
+          45.1
+        ],
+        [
+          30.6,
+          47.5
+        ],
+        [
+          34.6,
+          49.9
+        ],
+        [
+          34.6,
+          45.1
+        ],
+        [
+          37.0,
+          49.9
+        ],
+        [
+          37.0,
+          47.5
+        ],
+        [
+          37.0,
+          45.1
+        ],
+        [
+          47.400000000000006,
+          49.9
+        ],
+        [
+          49.800000000000004,
+          49.9
+        ],
+        [
+          49.800000000000004,
+          47.5
+        ],
+        [
+          53.800000000000004,
+          49.9
+        ],
+        [
+          60.2,
+          49.9
+        ],
+        [
+          60.2,
+          45.1
+        ],
+        [
+          62.6,
+          49.9
+        ],
+        [
+          62.6,
+          47.5
+        ],
+        [
+          62.6,
+          45.1
+        ],
+        [
+          9.0,
+          39.8
+        ],
+        [
+          9.0,
+          37.4
+        ],
+        [
+          15.4,
+          39.8
+        ],
+        [
+          15.4,
+          37.4
+        ],
+        [
+          15.4,
+          35.0
+        ],
+        [
+          17.8,
+          37.4
+        ],
+        [
+          21.8,
+          37.4
+        ],
+        [
+          24.2,
+          39.8
+        ],
+        [
+          28.200000000000003,
+          39.8
+        ],
+        [
+          28.200000000000003,
+          37.4
+        ],
+        [
+          30.6,
+          39.8
+        ],
+        [
+          30.6,
+          37.4
+        ],
+        [
+          34.6,
+          39.8
+        ],
+        [
+          34.6,
+          37.4
+        ],
+        [
+          37.0,
+          37.4
+        ],
+        [
+          41.0,
+          37.4
+        ],
+        [
+          41.0,
+          35.0
+        ],
+        [
+          43.4,
+          39.8
+        ],
+        [
+          43.4,
+          37.4
+        ],
+        [
+          47.400000000000006,
+          37.4
+        ],
+        [
+          49.800000000000004,
+          37.4
+        ],
+        [
+          49.800000000000004,
+          35.0
+        ]
+      ],
+      "cell_to_cell_spacing_mm": 6.4,
+      "dot_base_diameter_mm": 1.55,
+      "dot_height_mm": 0.75,
+      "front_dot_centres_mm": [
+        [
+          11.4,
+          20.2
+        ],
+        [
+          15.4,
+          22.6
+        ],
+        [
+          17.8,
+          25.0
+        ],
+        [
+          17.8,
+          22.6
+        ],
+        [
+          17.8,
+          20.2
+        ],
+        [
+          21.8,
+          22.6
+        ],
+        [
+          24.2,
+          25.0
+        ],
+        [
+          28.200000000000003,
+          22.6
+        ],
+        [
+          28.200000000000003,
+          20.2
+        ],
+        [
+          30.6,
+          25.0
+        ],
+        [
+          30.6,
+          22.6
+        ],
+        [
+          34.6,
+          25.0
+        ],
+        [
+          34.6,
+          22.6
+        ],
+        [
+          37.0,
+          22.6
+        ],
+        [
+          9.0,
+          14.9
+        ],
+        [
+          9.0,
+          12.5
+        ],
+        [
+          9.0,
+          10.100000000000001
+        ],
+        [
+          15.4,
+          14.9
+        ],
+        [
+          15.4,
+          10.100000000000001
+        ],
+        [
+          17.8,
+          12.5
+        ],
+        [
+          21.8,
+          14.9
+        ],
+        [
+          21.8,
+          12.5
+        ],
+        [
+          21.8,
+          10.100000000000001
+        ],
+        [
+          24.2,
+          10.100000000000001
+        ],
+        [
+          28.200000000000003,
+          14.9
+        ],
+        [
+          30.6,
+          12.5
+        ]
+      ],
+      "front_dot_count": 26,
+      "line_to_line_spacing_mm": 10.1,
+      "shape": "spherical cap",
+      "within_cell_spacing_mm": 2.4
+    },
+    "coordinate_system": "millimetres; front view is +Z; back geometry mirrors X for correct reading when viewed from -Z",
+    "design_coordinate_bounds_mm": [
+      0.0,
+      0.0,
+      -0.75,
+      76.19999694824219,
+      101.5999984741211,
+      2.799999952316284
+    ],
+    "mesh_bounds_mm": [
+      0.0,
+      4.7683715642676816e-08,
+      0.0,
+      76.19999694824219,
+      3.55,
+      101.5999984741211
+    ],
+    "mesh_triangle_count": 70940,
+    "mesh_vertex_count": 35472,
+    "panel": {
+      "height_mm": 101.6,
+      "thickness_mm": 2.0,
+      "width_mm": 76.2
+    },
+    "slicing_orientation": "production STL/3MF is pre-oriented upright on the long edge; +Z is card height",
+    "tactile": {
+      "art_bounds_mm": [
+        21.04736842105263,
+        55.94736842105264,
+        55.15263157894736,
+        86.63157894736842
+      ],
+      "edge_bevel_mm": 0.4,
+      "minimum_feature_mm": 1.394736842105263,
+      "mode": "source-derived tactile grid",
+      "relief_height_mm": 0.8,
+      "shape": "overlapping bevelled tactile cells",
+      "source_grid": {
+        "columns": 38,
+        "isolated_cells_removed": 0,
+        "raw_cell_count": 358,
+        "retained_cell_count": 358
+      }
+    },
+    "visual_text": {
+      "back_lines": [
+        "YOU MAKE",
+        "EVERY DAY",
+        "BRIGHT."
+      ],
+      "front_lines": [
+        "WITH LOVE"
+      ],
+      "minimum_stroke_mm": 0.9,
+      "relief_height_mm": 0.4,
+      "style": "raised 5x7 pixel lettering"
+    }
+  },
+  "human_review": {
+    "braille": "not yet human-reviewed",
+    "operator_quality_control_completed": false,
+    "physical_test_print_completed": false,
+    "tactile_tester_evaluation_completed": false,
+    "visual_layout_approved": false
+  },
+  "inputs": {
+    "greeting": "With love",
+    "main_message": "You make every day bright.",
+    "main_message_placement": "back face in print and uncontracted UEB",
+    "source_filename": "heart.svg",
+    "source_sha256": "74c572a5d5a7de44a58904ab1c1b0f60696e852a1383044ecfd0db3dd01c1207"
+  },
+  "package_id": "reference-heart-with-love",
+  "printer_interaction": {
+    "gcode_generated_offline": true,
+    "print_started": false,
+    "submitted_to_printer": false
+  },
+  "printer_profile": {
+    "bed_temperature_c": 65,
+    "brim_width_mm": 5,
+    "filament": "Sovol SV07 PLA",
+    "initial_nozzle_temperature_c": 235,
+    "layer_height_mm": 0.2,
+    "machine": "Sovol SV07 0.4 nozzle",
+    "normal_nozzle_temperature_c": 200,
+    "nozzle_diameter_mm": 0.4,
+    "process": "0.20mm Standard @Sovol SV07",
+    "profile_bundle_version": "02.04.00.01",
+    "stock_build_volume_xyz_mm": [
+      220.0,
+      220.0,
+      250.0
+    ],
+    "stock_profile_sha256": {
+      "filament": "98de4434a4aa6afeda112b3ee621866c57f24ae7a1d7c20b4307a9e541fe5d35",
+      "machine": "5433a5ab8ff3e31deba7228185c2aca1bc9c97e42a6c8ed1e390df58f8a0eccd",
+      "process": "ffc026a9c0db3985928c2291aa9a95bd2fac3e5324c3c6b3deaa45f5f4d07dd2"
+    },
+    "supports": "tree(auto), snug"
+  },
+  "schema_version": 1,
+  "tactile": {
+    "art_bounds_mm": [
+      21.04736842105263,
+      55.94736842105264,
+      55.15263157894736,
+      86.63157894736842
+    ],
+    "edge_bevel_mm": 0.4,
+    "minimum_feature_mm": 1.394736842105263,
+    "mode": "source-derived tactile grid",
+    "relief_height_mm": 0.8,
+    "shape": "overlapping bevelled tactile cells",
+    "source_grid": {
+      "columns": 38,
+      "isolated_cells_removed": 0,
+      "raw_cell_count": 358,
+      "retained_cell_count": 358
+    }
+  },
+  "versions": {
+    "OrcaSlicer": "2.4.2",
+    "OrcaSlicer_AppImage_sha256": "e1a07275a25f176626c55a5df39e91bc4476d8c28ee4a3192ff758e29dd5c3ba",
+    "Pillow": "12.2.0",
+    "generator": "0.1.0",
+    "liblouis": "3.29.0",
+    "manifold3d": "3.5.2",
+    "python": "3.12.3",
+    "reportlab": "4.1.0"
+  }
+}

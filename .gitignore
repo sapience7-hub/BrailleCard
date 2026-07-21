@@ -8,3 +8,4 @@ result.json
 .tools/
 build/
 dist/
+.braillecard-jobs/

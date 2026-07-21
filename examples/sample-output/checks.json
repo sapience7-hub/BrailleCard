@@ -1,0 +1,104 @@
+{
+  "braille_artwork_collision": {
+    "art_bounds_mm": [
+      21.04736842105263,
+      55.94736842105264,
+      55.15263157894736,
+      86.63157894736842
+    ],
+    "front_braille_region_mm": [
+      9.0,
+      13.0,
+      67.2,
+      28.0
+    ],
+    "passed": true
+  },
+  "braille_dimensional_baseline": {
+    "passed": true,
+    "required_ranges_mm": {
+      "cell_to_cell_spacing_mm": [
+        6.1,
+        7.6
+      ],
+      "dot_base_diameter_mm": [
+        1.5,
+        1.6
+      ],
+      "dot_height_mm": [
+        0.6,
+        0.9
+      ],
+      "line_to_line_spacing_mm": [
+        10.0,
+        10.2
+      ],
+      "within_cell_spacing_mm": [
+        2.3,
+        2.5
+      ]
+    },
+    "values_mm": {
+      "cell_to_cell_spacing_mm": 6.4,
+      "dot_base_diameter_mm": 1.55,
+      "dot_height_mm": 0.75,
+      "line_to_line_spacing_mm": 10.1,
+      "within_cell_spacing_mm": 2.4
+    }
+  },
+  "exports_generated": {
+    "missing_or_empty": [],
+    "passed": true
+  },
+  "minimum_feature_size": {
+    "minimum_actual_mm": 0.9,
+    "minimum_required_mm": 0.8,
+    "passed": true
+  },
+  "no_isolated_tactile_fragments": {
+    "component_count": 358,
+    "connection_rule": "isolated four-neighbour cells removed; each retained cell overlaps the base panel",
+    "passed": true
+  },
+  "no_unsafe_sharp_peaks": {
+    "geometry": "flat plateaus with 0.4 mm straight bevel; no point apex",
+    "maximum_bevel_slope_degrees": 45.0,
+    "passed": true
+  },
+  "panel_thickness": {
+    "actual_mm": 2.0,
+    "allowed_mm": [
+      1.8,
+      2.2
+    ],
+    "passed": true
+  },
+  "safe_margins": {
+    "art_bounds_mm": [
+      21.04736842105263,
+      55.94736842105264,
+      55.15263157894736,
+      86.63157894736842
+    ],
+    "passed": true,
+    "safe_margin_mm": 6.35
+  },
+  "sv07_build_area_fit": {
+    "passed": true,
+    "stock_build_volume_xyz_mm": [
+      220.0,
+      220.0,
+      250.0
+    ],
+    "upright_footprint_with_5mm_brim_xyz_mm": [
+      86.2,
+      13.55,
+      101.6
+    ]
+  },
+  "uploaded_file_readable": {
+    "error": "",
+    "passed": true,
+    "retained_original_count": 1
+  }
+}
