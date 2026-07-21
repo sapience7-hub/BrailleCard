@@ -64,6 +64,7 @@ video deliverable is still unfinished; do not represent the project as done.
 | Command | Result | Notes |
 | --- | --- | --- |
 | `rtk .venv/bin/python -m pytest -q` | PASS | 30 passed; one existing ReportLab deprecation warning. |
+| `PYTHONPATH=src .venv/bin/python -m braille_card --help` | PASS | Required because this environment has not installed the package into `.venv`; direct module invocation without `PYTHONPATH=src` fails. |
 | `rtk git diff --check` | PASS | No whitespace errors. |
 
 ### Remaining work
