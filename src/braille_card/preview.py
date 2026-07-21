@@ -12,9 +12,7 @@ from .documents import (
 )
 from .geometry import write_source_tactile_preview, write_source_tactile_svg
 from .images import normalize_image, validate_preview_image
-
-MAX_GREETING_CHARACTERS = 30
-MAX_MESSAGE_CHARACTERS = 140
+from .spec import MAX_BRAILLE_CELLS_PER_LINE, MAX_GREETING_CHARACTERS, MAX_MESSAGE_CHARACTERS
 
 
 def _load_card(card_config_path: Path) -> tuple[str, str]:
@@ -88,8 +86,8 @@ def generate_preview(image_path: Path, card_config_path: Path, output_dir: Path)
     greeting, message = _load_card(card_config_path)
     greeting_translation = translate(greeting)
     message_translation = translate(message)
-    front_lines = wrap_source(greeting, 16)
-    back_lines = wrap_source(message, 16)
+    front_lines = wrap_source(greeting, MAX_BRAILLE_CELLS_PER_LINE)
+    back_lines = wrap_source(message, MAX_BRAILLE_CELLS_PER_LINE)
     if output_dir.exists() and any(output_dir.iterdir()):
         raise FileExistsError(f"Output directory is not empty: {output_dir}")
     output_dir.mkdir(parents=True, exist_ok=True)

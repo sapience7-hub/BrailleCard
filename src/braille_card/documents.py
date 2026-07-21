@@ -71,10 +71,10 @@ def create_visual_preview(
     def centered(draw: ImageDraw.ImageDraw, text: str, y_mm: float, font: ImageFont.FreeTypeFont) -> None:
         draw.text((panel_size[0] / 2, (spec.CARD_HEIGHT - y_mm) * scale), text, fill="#111111", font=font, anchor="ma")
 
-    centered(fd, greeting, 64.0, _font(34))
-    centered(bd, message, 145.0, _font(25))
-    _draw_braille_pil(fd, front_lines, (14.0, 38.0), scale)
-    _draw_braille_pil(bd, back_lines, (14.0, 104.0), scale)
+    centered(fd, greeting, 35.0, _font(24))
+    centered(bd, message, 87.0, _font(18))
+    _draw_braille_pil(fd, front_lines, (9.0, 25.0), scale)
+    _draw_braille_pil(bd, back_lines, (9.0, 60.0), scale)
     fd.rectangle((0, 0, panel_size[0] - 1, panel_size[1] - 1), outline="#333333", width=2)
     bd.rectangle((0, 0, panel_size[0] - 1, panel_size[1] - 1), outline="#333333", width=2)
     preview.paste(front, (0, 0))
@@ -130,13 +130,13 @@ def create_layout_pdf(
             )
             c.setFillColor(black)
             c.setFont("Helvetica-Bold", 20)
-            c.drawCentredString(spec.CARD_WIDTH * mm / 2, 61 * mm, greeting)
-            _pdf_braille(c, front_lines, 14.0, 38.0)
+            c.drawCentredString(spec.CARD_WIDTH * mm / 2, 35 * mm, greeting)
+            _pdf_braille(c, front_lines, 9.0, 25.0)
         else:
             c.setFillColor(black)
             c.setFont("Helvetica", 15)
-            c.drawCentredString(spec.CARD_WIDTH * mm / 2, 144 * mm, message)
-            _pdf_braille(c, back_lines, 14.0, 104.0)
+            c.drawCentredString(spec.CARD_WIDTH * mm / 2, 87 * mm, message)
+            _pdf_braille(c, back_lines, 9.0, 60.0)
         c.showPage()
     c.save()
 

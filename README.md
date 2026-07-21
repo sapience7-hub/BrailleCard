@@ -1,7 +1,7 @@
 # Braille greeting card reference generator
 
 This repository generates one deterministic, machine-checked production package
-for the flat 5 × 7 inch reference card in `docs/PRODUCT_GOAL.md`. It does not
+for the flat 3 × 4 inch portrait reference card in `docs/PRODUCT_GOAL.md`. It does not
 discover, contact, upload to, or start a printer.
 
 System prerequisites are Python 3.12, liblouis with `en-ueb-g1.ctb`, ImageMagick,

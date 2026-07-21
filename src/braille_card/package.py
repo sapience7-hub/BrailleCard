@@ -29,7 +29,7 @@ def _write_operator_documents(package_dir: Path) -> None:
 
 Status: **machine-generated candidate; not test-printed or operator-approved**.
 
-This package targets one upright, long-edge-on-bed, single-piece 127.0 × 177.8
+This package targets one upright, long-edge-on-bed, single-piece 76.2 × 101.6
 mm PLA card. `card.gcode` was generated offline for the stock OrcaSlicer 2.4.2
 Sovol SV07 0.4 mm machine, Sovol SV07 PLA, and 0.20 mm process profiles, with
 tree(auto) snug supports and a 5 mm brim. The stock PLA temperatures resolved to
@@ -63,7 +63,7 @@ and remains deliberately unchecked.
 
 ## Before printing
 
-- [ ] User approves the heart crop, front greeting, and back message.
+- [ ] User approves the tactile artwork crop, front greeting, and back message.
 - [ ] Source print text and UEB transcription are proofread side by side.
 - [ ] A qualified Braille reviewer approves the transcription and layout.
 - [ ] Operator previews the complete G-code and confirms the intended SV07,
@@ -75,7 +75,7 @@ and remains deliberately unchecked.
 
 - [ ] Operator performs the first physical SV07 test print; no job has been
       submitted or started by this generator.
-- [ ] Card finishes at 127.0 × 177.8 mm and fits an A7 envelope without forcing.
+- [ ] Card finishes at 76.2 × 101.6 mm and fits the intended small envelope without forcing.
 - [ ] Base panel is 1.8–2.2 mm thick away from relief.
 - [ ] Braille dot base diameter is 1.5–1.6 mm and height is 0.6–0.9 mm.
 - [ ] Within-cell, cell-to-cell, and line-to-line spacing meet the documented
@@ -89,9 +89,9 @@ and remains deliberately unchecked.
 
 - [ ] A qualified Braille reader verifies the physical front and back text,
       orientation, spacing, punctuation, and readability.
-- [ ] At least three people evaluate the tactile heart; at least one is blind or
+- [ ] At least three people evaluate the tactile artwork; at least one is blind or
       has substantial tactile-graphics experience.
-- [ ] Testers identify the heart or provide a consistent meaningful description.
+- [ ] Testers identify the intended artwork or provide a consistent meaningful description.
 - [ ] Feedback and any required geometry/profile revisions are recorded.
 
 ## Reproduction gate (deferred)
@@ -149,7 +149,7 @@ def _manifest(
             "base_panel_thickness_mm": spec.PANEL_THICKNESS,
             "safe_margin_mm": spec.SAFE_MARGIN,
             "material": "PLA",
-            "envelope_target": "A7",
+            "envelope_target": "small portrait card envelope",
         },
         "braille": {
             "code": "Unified English Braille",
@@ -226,8 +226,8 @@ def generate_package(
     _, normalized = normalize_image(image_path, output_dir)
     greeting_translation = translate(greeting)
     message_translation = translate(message)
-    front_lines = wrap_source(greeting, 16)
-    back_lines = wrap_source(message, 16)
+    front_lines = wrap_source(greeting, spec.MAX_BRAILLE_CELLS_PER_LINE)
+    back_lines = wrap_source(message, spec.MAX_BRAILLE_CELLS_PER_LINE)
     write_braille_artifacts(
         greeting_translation, message_translation, front_lines, back_lines, output_dir
     )

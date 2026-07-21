@@ -110,10 +110,10 @@ def test_preview_enforces_raster_and_text_limits(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="15 MB"):
         generate_preview(too_large, _card(tmp_path / "large.json"), tmp_path / "large-preview")
 
-    with pytest.raises(ValueError, match="30 characters"):
-        generate_preview(valid, _card(tmp_path / "long-greeting.json", greeting="g" * 31), tmp_path / "long-greeting")
-    with pytest.raises(ValueError, match="140 characters"):
-        generate_preview(valid, _card(tmp_path / "long-message.json", message="m" * 141), tmp_path / "long-message")
+    with pytest.raises(ValueError, match="9 characters"):
+        generate_preview(valid, _card(tmp_path / "long-greeting.json", greeting="g" * 10), tmp_path / "long-greeting")
+    with pytest.raises(ValueError, match="27 characters"):
+        generate_preview(valid, _card(tmp_path / "long-message.json", message="m" * 28), tmp_path / "long-message")
 
 
 def test_preview_rejects_unsupported_and_unreadable_images(tmp_path: Path) -> None:

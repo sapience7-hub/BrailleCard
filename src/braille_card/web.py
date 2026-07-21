@@ -72,7 +72,7 @@ PAGE = """<!doctype html>
       <h2>Create a Tactile Card Preview</h2>
       <form class="grid" method="post" action="{{ url_for('create_job') }}" enctype="multipart/form-data">
         <section class="card"><label for="image">Artwork</label><input id="image" name="image" type="file" accept=".png,.jpg,.jpeg,.webp,.svg,image/png,image/jpeg,image/webp,image/svg+xml" required><small>PNG, JPEG, WebP, or SVG. Raster images: 600 × 600 pixels minimum, 15 MB maximum.</small></section>
-        <section class="card"><label for="greeting">Front Greeting</label><input id="greeting" name="greeting" maxlength="30" autocomplete="off" required><small>Up to 30 characters.</small><label for="message">Back Message</label><textarea id="message" name="message" maxlength="140" autocomplete="off" required></textarea><small>Up to 140 characters.</small><button type="submit">Create Local Preview</button></section>
+        <section class="card"><label for="greeting">Front Greeting</label><input id="greeting" name="greeting" maxlength="9" autocomplete="off" required><small>Up to 9 characters on the 3 × 4 inch portrait card.</small><label for="message">Back Message</label><textarea id="message" name="message" maxlength="27" autocomplete="off" required></textarea><small>Up to 27 characters on the 3 × 4 inch portrait card.</small><button type="submit">Create Local Preview</button></section>
       </form>
     {% endif %}
   </main>

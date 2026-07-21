@@ -41,7 +41,7 @@ def test_full_package_is_byte_identical_and_path_clean(tmp_path: Path) -> None:
         if name != "manifest.json"
     }
     pdf = (first / "layout.pdf").read_bytes()
-    assert b"/MediaBox [ 0 0 360 504 ]" in pdf
+    assert b"/MediaBox [ 0 0 216 288 ]" in pdf
     assert b"/Count 2" in pdf
 
     forbidden = [str(tmp_path), str(repository), socket.gethostname()]

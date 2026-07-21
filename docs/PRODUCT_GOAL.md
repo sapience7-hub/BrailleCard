@@ -29,7 +29,7 @@ The user should not need CAD or Braille expertise. They provide an image, enter 
 
 Use a flat, single-panel construction as the default first version:
 
-- Standard finished card size: 5 × 7 inches, portrait or landscape.
+- Current finished card size: 3 × 4 inches, portrait (76.2 × 101.6 mm).
 - Construction: one rigid PLA card printed on the SV07—no fold, hinge, or separate tactile insert required.
 - Front face: embossed image, visual text, and UEB Braille arranged as one composition.
 - Back face: optional signature, short printed note, production mark, or left blank.
@@ -39,7 +39,7 @@ The card should feel like a substantial keepsake or accessible postcard. Full-co
 
 ### Construction modes
 
-1. **Flat card:** one rigid 5 × 7 PLA panel; simplest and most reliable default.
+1. **Flat card:** one rigid 3 × 4 portrait PLA panel; simplest and most reliable default.
 2. **Flexure-fold card:** two panels joined by a calibrated thinner center seam that bends as an integral hinge.
 3. **Mechanical-hinge card:** two printed panels joined by interlocking hinge barrels and a removable pin or captured printed pin.
 
@@ -142,7 +142,7 @@ Each approved card receives its own project folder containing:
 ### Automated checks
 
 - Uploaded file is readable and within supported limits.
-- Card layout fits the selected 5 × 7 template and safe margins.
+- Card layout fits the current 3 × 4 portrait template and safe margins.
 - Braille cells do not collide with artwork, trim, edge finishing, or handling areas.
 - Braille geometry remains within the selected dimensional baseline.
 - Tactile artwork has no isolated fragments, unsafe sharp peaks, or features too small to print reliably.
@@ -176,7 +176,7 @@ Each approved card receives its own project folder containing:
 
 ### Included
 
-- One 5 × 7 card template in portrait and landscape.
+- One 3 × 4 portrait card template.
 - JPG/JPEG, PNG, WebP, and SVG input.
 - PDF import if technically straightforward.
 - Visual image layout and basic crop controls.
@@ -197,7 +197,7 @@ Each approved card receives its own project folder containing:
 
 ## Implementation phases
 
-1. **Template:** Produce one manually validated flat 5 × 7 PLA card with visual text, a short UEB message, and a tactile silhouette.
+1. **Template:** Produce one manually validated flat 3 × 4 portrait PLA card with visual text, a short UEB message, and a tactile silhouette.
 2. **Generator:** Automate image/text input, layout, UEB translation, geometry generation, and project export.
 3. **Calibration:** Create the SV07 Braille and tactile-feature calibration coupon and lock an approved printer profile.
 4. **Fold options:** Add a seam-thickness calibration strip and mechanical-hinge clearance test, then choose validated parameters.
@@ -211,7 +211,7 @@ Create one end-to-end reference card using:
 
 - a simple high-contrast image with one main subject;
 - a short front greeting and inside message;
-- a flat 5 × 7 portrait card template;
+- a flat 3 × 4 portrait card template;
 - a tactile silhouette or contour image;
 - uncontracted UEB for the first calibration example; and
 - an SV07 PLA test print using the 0.4 mm nozzle.

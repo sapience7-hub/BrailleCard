@@ -22,8 +22,8 @@ def test_spherical_cap_has_exact_ada_base_and_height() -> None:
 
 def test_combined_geometry_is_one_boolean_solid() -> None:
     mesh, metadata = build_combined_mesh(
-        wrap_source("With love", 16),
-        wrap_source("You make every day bright.", 16),
+        wrap_source("With love", spec.MAX_BRAILLE_CELLS_PER_LINE),
+        wrap_source("You make every day bright.", spec.MAX_BRAILLE_CELLS_PER_LINE),
     )
     assert len(mesh.vertices) > 10_000
     assert len(mesh.triangles) > 20_000
@@ -49,7 +49,8 @@ def test_source_artwork_controls_tactile_geometry(tmp_path) -> None:
     assert source_grid["isolated_cells_removed"] == 0
 
     mesh, metadata = build_combined_mesh(
-        wrap_source("With love", 16), wrap_source("You make every day bright.", 16),
+        wrap_source("With love", spec.MAX_BRAILLE_CELLS_PER_LINE),
+        wrap_source("You make every day bright.", spec.MAX_BRAILLE_CELLS_PER_LINE),
         normalized_image=artwork,
     )
     assert metadata["tactile"]["mode"] == "source-derived tactile grid"
@@ -57,6 +58,7 @@ def test_source_artwork_controls_tactile_geometry(tmp_path) -> None:
     assert mesh.bounds()[5] == pytest.approx(2.8)
 
     _, legacy = build_combined_mesh(
-        wrap_source("With love", 16), wrap_source("You make every day bright.", 16),
+        wrap_source("With love", spec.MAX_BRAILLE_CELLS_PER_LINE),
+        wrap_source("You make every day bright.", spec.MAX_BRAILLE_CELLS_PER_LINE),
     )
     assert legacy["tactile"]["mode"] == "reference silhouette"

@@ -177,11 +177,11 @@ class Mesh:
 
 # Connected chain of overlapping rounded ellipses. Values are x, y, rx, ry in mm.
 HEART_SHAPES = (
-    (41.5, 140.0, 24.0, 24.0),
-    (85.5, 140.0, 24.0, 24.0),
-    (63.5, 121.0, 31.0, 24.0),
-    (63.5, 101.0, 22.0, 25.0),
-    (63.5, 84.0, 10.0, 13.0),
+    (27.0, 78.0, 12.0, 12.0),
+    (49.0, 78.0, 12.0, 12.0),
+    (38.0, 68.0, 16.0, 12.0),
+    (38.0, 57.0, 12.0, 13.0),
+    (38.0, 48.5, 5.0, 7.0),
 )
 TACTILE_BEVEL = 0.4
 BOOLEAN_OVERLAP = 0.08
@@ -256,7 +256,9 @@ def _add_pixel_text(
                 mesh.add_box((x0, y0, z0, x1, y1, z1))
 
 
-def _wrap_visual_text(source: str, max_characters: int = 16) -> list[str]:
+def _wrap_visual_text(
+    source: str, max_characters: int = spec.MAX_VISUAL_CHARACTERS_PER_LINE,
+) -> list[str]:
     words = source.upper().split()
     lines: list[str] = []
     current = ""
@@ -348,25 +350,25 @@ def build_combined_mesh(
 
     visual_greeting = _wrap_visual_text(greeting)
     if len(visual_greeting) != 1:
-        raise ValueError("Front greeting must fit on one 16-character visual line")
+        raise ValueError("Front greeting must fit on one 9-character visual line")
     visual_message = _wrap_visual_text(message)
-    if len(visual_message) > 2:
-        raise ValueError("Back message must fit on at most two 16-character visual lines")
-    _add_pixel_text(mesh, visual_greeting[0], spec.CARD_WIDTH / 2, 58.0,
+    if len(visual_message) > 3:
+        raise ValueError("Back message must fit on at most three 9-character visual lines")
+    _add_pixel_text(mesh, visual_greeting[0], spec.CARD_WIDTH / 2, 32.0,
                     spec.PANEL_THICKNESS - BOOLEAN_OVERLAP,
                     spec.PANEL_THICKNESS + spec.VISUAL_TEXT_RELIEF_HEIGHT)
     for line_index, visual_line in enumerate(visual_message):
-        _add_pixel_text(mesh, visual_line, spec.CARD_WIDTH / 2, 143.0 - line_index * 10.5,
+        _add_pixel_text(mesh, visual_line, spec.CARD_WIDTH / 2, 87.0 - line_index * 10.0,
                         -spec.VISUAL_TEXT_RELIEF_HEIGHT, BOOLEAN_OVERLAP, back=True)
 
     front_dots: list[tuple[float, float]] = []
     for line_index, line in enumerate(front_lines):
-        front_dots.extend(dot_centres(line.unicode, origin_x=14.0,
-                                      origin_y=38.0 - line_index * spec.BRAILLE_LINE_SPACING))
+        front_dots.extend(dot_centres(line.unicode, origin_x=9.0,
+                                      origin_y=25.0 - line_index * spec.BRAILLE_LINE_SPACING))
     back_dots_layout: list[tuple[float, float]] = []
     for line_index, line in enumerate(back_lines):
-        back_dots_layout.extend(dot_centres(line.unicode, origin_x=14.0,
-                                            origin_y=104.0 - line_index * spec.BRAILLE_LINE_SPACING))
+        back_dots_layout.extend(dot_centres(line.unicode, origin_x=9.0,
+                                            origin_y=60.0 - line_index * spec.BRAILLE_LINE_SPACING))
     for x, y in front_dots:
         mesh.add_bevelled_disc(x, y, spec.BRAILLE_DOT_DIAMETER * 0.42,
                                spec.PANEL_THICKNESS - BOOLEAN_OVERLAP,

@@ -73,8 +73,8 @@ The implementation of this workflow follows a 5-step staged progression:
 *Goal: Collect greeting text, translate to uncontracted Unified English Braille (UEB), and format multi-surface layout.*
 
 * **Supported Inputs**:
-  * **Front Greeting**: Short title/headline (max 30 characters).
-  * **Back Note**: Main message placed on the back face of flat cards (max 140 characters).
+  * **Front Greeting**: Short title/headline (max 9 characters).
+  * **Back Note**: Main message placed on the back face of flat cards (max 27 characters).
   * **Recipient Level**: Beginner / Uncontracted UEB (default for initial release).
 * **Processing**:
   * Execute deterministic UEB translation via `liblouis`.
@@ -94,7 +94,7 @@ The implementation of this workflow follows a 5-step staged progression:
 *Goal: Configure card dimensions, orientation, and physical template parameters.*
 
 * **Supported Choices**:
-  * **Primary Format**: 5 × 7 inch (127.0 × 177.8 mm) flat rigid plaque card (Portrait or Landscape).
+  * **Primary Format**: 3 × 4 inch (76.2 × 101.6 mm) flat rigid plaque card (Portrait).
   * **Alternative Options**: Small tactile tester tiles (e.g., 3 × 3 inch) for low-cost geometry calibration.
 * **Physical Constraints (ADA 2010 Compliant)**:
   * Base card thickness: 2.0 mm flat PLA plaque.
@@ -174,7 +174,7 @@ The implementation of this workflow follows a 5-step staged progression:
   * Estimated time remaining & total elapsed print time.
 * **Automated Acceptance Checks**:
   * Telemetry queries rely strictly on read-only Moonraker REST/WebSocket status endpoints (`print_stats`, `virtual_sdcard`).
-  * Job completion automatically resets heater targets to 0 °C and records final timestamps in job history.
+  * Job completion records final timestamps in job history; browser telemetry never changes heater targets.
   * Any printer disconnect or error transitions UI to a safe `disconnected` / `error` state with full log capture.
 
 ---
@@ -185,7 +185,7 @@ The implementation of this workflow follows a 5-step staged progression:
 | :--- | :--- | :--- | :--- |
 | **1. Upload** | Normalized PNG / SVG vector | Format, resolution, margin check | User image selection & crop |
 | **2. Message & Braille** | UEB text & side-by-side table | Character set, `liblouis` UEB check | `Not human-reviewed` status warning |
-| **3. Size Choice** | Parametric plaque spec | ADA 2010 tolerances, bed fit | Format selection (5×7 default) |
+| **3. Size Choice** | Parametric plaque spec | ADA 2010 tolerances, bed fit | 3×4 portrait template |
 | **4. Rendered Preview** | PDF, STL, 3MF, G-code, Manifest | 100% `pytest` pass, checksum audit | Review visual & tactile layout |
 | **5. Explicit Approval** | Signed Job Authorization Token | UI state gate, mock verification | **Explicit Operator Click Required** |
 | **6. Camera** | Read-only stream widget | Stream health & isolation check | Visual bed clearance check |

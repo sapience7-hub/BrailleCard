@@ -5,7 +5,6 @@ from pathlib import Path
 
 from .package import generate_package
 from .preview import generate_preview
-from .web import create_app
 
 
 def main() -> None:
@@ -24,6 +23,8 @@ def main() -> None:
     parser.add_argument("--slicer-root", type=Path)
     args = parser.parse_args()
     if args.serve:
+        from .web import create_app
+
         create_app().run(host=args.host, port=args.port, debug=False)
         return
     if args.image is None or args.card is None or args.output is None:

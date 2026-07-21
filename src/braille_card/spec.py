@@ -1,7 +1,7 @@
 """Single-reference-card dimensions and layout constants, in millimetres."""
 
-CARD_WIDTH = 127.0
-CARD_HEIGHT = 177.8
+CARD_WIDTH = 76.2
+CARD_HEIGHT = 101.6
 PANEL_THICKNESS = 2.0
 PANEL_THICKNESS_RANGE = (1.8, 2.2)
 SAFE_MARGIN = 6.35
@@ -33,8 +33,15 @@ SV07_PROFILE_BUNDLE_VERSION = "02.04.00.01"
 ORCA_SLICER_VERSION = "2.4.2"
 
 # Named rectangles use (left, bottom, right, top) in front-view coordinates.
-FRONT_ART_REGION = (16.0, 71.0, 111.0, 166.0)
-FRONT_PRINT_REGION = (12.0, 55.0, 115.0, 70.0)
-FRONT_BRAILLE_REGION = (12.0, 17.0, 115.0, 45.0)
-BACK_PRINT_REGION = (12.0, 126.0, 115.0, 158.0)
-BACK_BRAILLE_REGION = (12.0, 77.0, 115.0, 111.0)
+# The card is 3 × 4 inches, portrait. Text limits below preserve the existing
+# UEB dot spacing while keeping visual copy and tactile art distinct.
+FRONT_ART_REGION = (11.1, 42.0, 65.1, 95.0)
+FRONT_PRINT_REGION = (9.0, 31.0, 67.2, 40.0)
+FRONT_BRAILLE_REGION = (9.0, 13.0, 67.2, 28.0)
+BACK_PRINT_REGION = (9.0, 67.0, 67.2, 95.0)
+BACK_BRAILLE_REGION = (9.0, 35.0, 67.2, 64.0)
+
+MAX_GREETING_CHARACTERS = 9
+MAX_MESSAGE_CHARACTERS = 27
+MAX_BRAILLE_CELLS_PER_LINE = 9
+MAX_VISUAL_CHARACTERS_PER_LINE = 9
