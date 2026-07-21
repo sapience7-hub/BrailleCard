@@ -1,5 +1,8 @@
 # Reference card — operator test print photos
 
+Earmarked as source material for the outstanding video deliverable tracked in
+`HANDOFF.md` ("Remaining work" / "Next action").
+
 Three phone photos of the cooled, physical test print of the front face of
 the `examples/card.json` reference card (`"With love"` greeting, heart
 subject), submitted 2026-07-21. They show the raised "WITH LOVE" print text,

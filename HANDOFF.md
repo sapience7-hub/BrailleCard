@@ -231,6 +231,12 @@ physical dots, tactile-tester evaluation, or inspection of layer adhesion,
 warping, or support-removal marks. No `QUALITY_CONTROL.md` item is marked
 complete on the basis of these photos.
 
+The user has since said these photos are intended as source material for the
+outstanding video deliverable noted below (see "Remaining work" / "Next
+action"). Video scope (audience, format, length, platform, whether to
+include the 2026-07-19 Flat v4 timelapse/full-capture footage) is still
+unconfirmed.
+
 ## 2026-07-19 one-off Flat v4 physical run
 
 The user explicitly authorized one physical print of
